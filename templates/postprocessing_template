@@ -1,0 +1,38 @@
+#!/bin/bash
+
+cp my-error.txt {{ MYWRKSHR }}/log/my-error_{{ jobid }}.txt
+cp my-out.txt {{ MYWRKSHR }}/log/my-out_{{ jobid }}.txt
+echo copy logs
+
+cp hclake_end.srv8 hclake.srv8
+cp hclake_end.srv8 {{ MYWRKSHR }}/hclake/hclake_{{ year }}{{ mon }}.srv8
+echo copy hclake
+
+cd {{ DIR }}/xf/ 
+tar -cf e{{ USER }}{{ EXP }}f{{ year }}{{ mon }}0100.tar  e{{ USER }}{{ EXP }}f{{ year }}{{ mon }}0100 e{{ USER }}{{ EXP }}g{{ year }}{{ mon }}0100
+mv e{{ USER }}{{ EXP }}f{{ year }}{{ mon }}0100.tar {{ PFADRES }}
+echo copy restart files
+
+cd {{ DIR }}/xm/
+cp e{{ USER }}{{ EXP }}m{{ year }}{{ mon }}  e{{ USER }}{{ EXP }}s{{ year }}{{ mon }} {{ PFADRES }}
+echo copy monthly files
+
+cd {{ DIR }}/xt/
+tar -cf e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}????
+mv e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar  {{ PFADRES }}
+echo copy 6h files
+
+cd {{ DIR }}/xe/
+tar -cf e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar  e{{ USER }}{{ EXP }}e_c???_{{ year }}{{ mon }}
+mv e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar {{ PFADRES }}
+echo copy e files
+
+cd {{ DIR }}/xn/
+tar -cf e{{ USER }}{{ EXP }}n{{ year }}{{ mon }}.tar e{{ USER }}{{ EXP }}n_c???_{{ year }}{{ mon }}
+mv e{{ USER }}{{ EXP }}n{{ year }}{{ mon }}.tar {{ PFADRES }}
+echo copy n files
+
+cd {{ MYWRKSHR }}
+
+
+

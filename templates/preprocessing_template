@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd {{ PFADFRC }}
+echo unpacking a{{ BUSER }}{{ BEXP }}a{{ year }}{{ mon }}.tar
+tar -xf a{{ BUSER }}{{ BEXP }}a{{ year }}{{ mon }}.tar -C {{ DIR }}/xa/
+echo unpacking a{{ BUSER }}{{ BEXP }}a{{ nyear }}{{ nmon }}.tar
+tar -xf a{{ BUSER }}{{ BEXP }}a{{ nyear }}{{ nmon }}.tar -C {{ DIR }}/xa/
+echo done
+
+
+
+

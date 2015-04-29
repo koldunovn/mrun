@@ -1,0 +1,89 @@
+ &PARCTL
+  NPROCXM=8,
+  NPROCYM=10
+ /
+ &EMGRID
+  MOIE=217,
+  MOJE=151,
+  MOKE=27,
+  PHILU=-26.40,
+  RLALU=-36.52,
+  POLPHI=79.95,
+  POLLAM=-123.34,
+  DLAM=0.44,
+  DPHI=0.44
+/
+ &RUNCTL
+  NHANF={{ KSA }},
+  NHENDE={{ KSE }},
+  YADAT='1960010100',
+  NHEAA=1,
+  NHDEA=1,
+  NHFORA={{ KSE }},
+  NHDFOR=9999999,
+  NHTAA=6,
+  NHDTA=6,
+  NHDAA=6,
+  NHDDA=6,
+  NHDMXN=1,
+  DT=240,
+  NHDR=6,
+  LQWR=.FALSE.,
+  LMOMON=.FALSE.,
+  LSCEN=.TRUE.,
+  LMOMIT=.TRUE.,
+  LGMON=.TRUE.,
+  DLAND=1.5E+4
+  DNOPRC=3.0E+4
+ /
+ &DYNCTL
+ /
+ &PHYCTL
+  LPHY=.TRUE.,
+  HDRAD=1,
+  IEXC=5,
+  LAKKU=.FALSE.,
+  LNEAR=.FALSE.,
+  LVEG=.TRUE.,
+  LINBOX=.TRUE.,
+  LAEROZ=.FALSE.,
+  LECGAD=.FALSE.,
+  LSICED=.FALSE.,
+  L5LAY=.FALSE.,
+  LCOLDC=.TRUE.,
+ /
+ &NMICTL
+  LANMI=.TRUE.,
+  DTNMI=45.0
+ /
+ &PRICTL
+  LDIA=.FALSE.,
+ /
+ &DATEN
+  YADEN='003',
+  YRDEN='003',
+  YEDEN='004',
+  YFDEN='004',
+  YTDEN='004',
+  YUSERA='055',
+  YUSERE='055',
+  YADCAT='/lustre/jwork/hhh24/hhh242/model_run/xa/',
+  YRDCAT='/lustre/jwork/hhh24/hhh242/model_run/xa/',
+  YEDCAT='/lustre/jwork/hhh24/hhh242/model_run/xe/',
+  YFDCAT='/lustre/jwork/hhh24/hhh242/model_run/xf/',
+  YMDCAT='/lustre/jwork/hhh24/hhh242/model_run/xm/',
+  YTDCAT='/lustre/jwork/hhh24/hhh242/model_run/xt/',
+  YNDCAT='/lustre/jwork/hhh24/hhh242/model_run/xn/',
+  YTVARN='FIB     ','T       ','U       ','V       ','QD      ','PS      ',
+         'VERVEL  ','QW      ','FI      ','ACLC    ','BLA     ','ALBECH  ',
+         'VAROR   ','FOREST  ','TKE     ','FAO     ','RGCGN   ','FCAP    ',
+         'WSMX    ','GLAC    ','WSECH   ','SN      ','TD      ','TDCL    ',
+         'TSN     ','TD3     ','TD4     ','TD5     ','QDB     ','WL      ',
+         'TSECH   ','TSLECH  ','TSWECH  ','TSIECH  ','SEAICE  ','SICED   ',
+         'QDBL    ','PHI     ','RLA     ',
+ YBDCAT='/lustre/jwork/hhh24/hhh242/libs/',
+ YBDNAM='vgryear_cordex.srv','vltyear_cordex.srv','albyear_SA_CORDEX.srv',
+ YGDCAT='/lustre/jwork/hhh24/hhh242/data/',
+ YGDNAM='GHG_1850_2011_era.txt',
+/ 
+
