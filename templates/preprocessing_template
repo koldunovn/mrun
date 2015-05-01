@@ -1,5 +1,15 @@
 #!/bin/bash
 
+{% if firstrun==True %}
+mkdir {{ DIR }}
+mkdir {{ PFADRES }}
+#mkdir {{ DIR }}/log
+#mkdir {{ DIR }}/hclake
+    {% for xfolder in xfolders %}
+mkdir {{ DIR }}/{{ xfolder }}
+    {% endfor %}
+{% endif %}
+
 cd {{ PFADFRC }}
 echo unpacking a{{ BUSER }}{{ BEXP }}a{{ year }}{{ mon }}.tar
 tar -xf a{{ BUSER }}{{ BEXP }}a{{ year }}{{ mon }}.tar -C {{ DIR }}/xa/

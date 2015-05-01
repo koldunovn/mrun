@@ -19,21 +19,27 @@ TEMPLATE_ENVIRONMENT = Environment(
 inidate = datetime.datetime(1960,1,1,0)
 
 #start date for this concrete simulation
-sdate = datetime.datetime(1960,10,1,0)
+sdate = datetime.datetime(1960,1,1,0)
 
 #end date for this concrete simulation (not including this date)
-edate = datetime.datetime(1960,12,1,0)
+edate = datetime.datetime(1960,2,1,0)
+
+DT='120'
 
 USER  = '055'
-EXP   = '004'
+EXP   = '006'
 BUSER = '055'
-BEXP  = '003' 
+BEXP  = '005' 
 #local place for tar forcing files (will be untared during preprocessing)
 
-DIR = '/lustre/jwork/hhh24/hhh242/model_run/'
-PFADFRC = '/lustre/jwork/hhh24/hhh242/FORCING/'
-PFADRES = '/lustre/jwork/hhh24/hhh242/results/'
-MYWRKSHR = '/lustre/jwork/hhh24/hhh242/'
+MYWRKSHR = '/lustre/jhome15/hhh24/hhh242/TEST/mrun/'
+DIR =      MYWRKSHR+'/'+'tmp_'+USER+EXP
+PFADFRC =  MYWRKSHR+'/FORCING/'
+PFADRES =  MYWRKSHR+'/results/'
+INPUT_file = 'INPUT_'+USER+EXP
+xfolders = ['xa', 'xe', 'xf', 'xm', 'xn', 'xt']
+firstrun = True
+
 
 #difference in hours
 KSA_ini = (sdate-inidate).total_seconds()/3600
@@ -68,21 +74,21 @@ for i in range(nmonths):
     
     preprocessing(PFADFRC, DIR, BUSER, BEXP, date_centered, mon_plus)
     
-    generate_INPUT(KSA, KSE)
+    generate_INPUT('INPUT_'+USER+EXP, KSA, KSE, DT, DIR, MYWRKSHR )
     
-    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
+#    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
     
-    print('Job ID:'+jobid)
+#    print('Job ID:'+jobid)
 
     complete = False
     #print(complete)
-    while complete==False:
+#    while complete==False:
         #print(complete)
-        a = nsub.get_job_state(int(jobid))
-        print("Job state:"+a['EState'])
-        complete = nsub.is_job_done(int(jobid))
-        time.sleep(100)
-    
+#        a = nsub.get_job_state(int(jobid))
+#        print("Job state:"+a['EState'])
+#        complete = nsub.is_job_done(int(jobid))
+#        time.sleep(100)
+    jobid=11   
     postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP,  date_centered, jobid) 
     
     

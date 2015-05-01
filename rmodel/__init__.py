@@ -69,9 +69,13 @@ def preprocessing(PFADFRC, DIR, BUSER, BEXP, date, ndate):
     print('Preprocessing is over')
 
 
-def generate_INPUT(KSA, KSE):
+def generate_INPUT(fname, KSA, KSE, DT, DIR, MYWRKSHR ):
     ofile = open('INPUT', 'w')
-    out_init = TEMPLATE_ENVIRONMENT.get_template('INPUT_template').render(KSA=KSA, KSE=KSE)
+    out_init = TEMPLATE_ENVIRONMENT.get_template(fname).render(KSA=KSA,\
+                                                               KSE=KSE,\
+                                                               DIR=DIR,\
+                                                               MYWRKSHR=MYWRKSHR,
+                                                               DT=DT)
 
     ofile.write(out_init)
     ofile.close()
