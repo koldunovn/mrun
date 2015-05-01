@@ -11,22 +11,22 @@ TEMPLATE_ENVIRONMENT = Environment(
 def diff_month(d1, d2):
     return (d1.year - d2.year)*12 + d1.month - d2.month
 
-def forcing_present(path, BUSER, BEXP, date, ndate, KSA ):
-    if KSA > 0:
-        ff = '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(date.year), str(date.month).zfill(2))
-        ff2= '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(ndate.year), str(ndate.month).zfill(2))
+def forcing_present(path, BUSER, BEXP, date, ndate):
+#    if KSA > 0:
+    ff = '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(date.year), str(date.month).zfill(2))
+    ff2= '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(ndate.year), str(ndate.month).zfill(2))
 
-        print ff
-        if os.path.isfile(ff):
-            print('Forcing tar file exist')
-        else:
-            raise NameError('Forcing tar file {} do not exist'.format(ff))
+    print ff
+    if os.path.isfile(ff):
+        print('Forcing tar file exist')
+    else:
+        raise NameError('Forcing tar file {} do not exist'.format(ff))
 
-        print ff2
-        if os.path.isfile(ff2):
-            print('Forcing tar file exist')
-        else:
-            raise NameError('Forcing tar file {} do not exist'.format(ff2))
+    print ff2
+    if os.path.isfile(ff2):
+        print('Forcing tar file exist')
+    else:
+        raise NameError('Forcing tar file {} do not exist'.format(ff2))
 
 
 
@@ -71,13 +71,17 @@ def preprocessing(PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, firstrun, xfo
     print('Preprocessing is over')
 
 
-def generate_INPUT(fname, KSA, KSE, DT, DIR, MYWRKSHR ):
+def generate_INPUT(fname, KSA, KSE, DT, DIR, MYWRKSHR, USER, EXP, BUSER, BEXP ):
     ofile = open('INPUT', 'w')
     out_init = TEMPLATE_ENVIRONMENT.get_template(fname).render(KSA=KSA,\
                                                                KSE=KSE,\
                                                                DIR=DIR,\
                                                                MYWRKSHR=MYWRKSHR,
-                                                               DT=DT)
+                                                               DT=DT,\
+                                                               USER=USER,\
+                                                               EXP=EXP,\
+                                                               BUSER=BUSER,\
+                                                               BEXP=BEXP)
 
     ofile.write(out_init)
     ofile.close()
@@ -105,6 +109,16 @@ def postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid):
     print(out)
     print(err)
     print('postprocessing over')
+
+def check_exitcode(fname, sendmail=True):
+    f = open(fname)
+    a = f.readlines()[2].split()[1]
+    if a == '0':
+        print('Exit code is fine')
+        return a
+    else: 
+        raise NameError('Exit code is not 0, simulation failed')
+
 
 def postprocessing_pure(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid):
     ofile = open('postprocessing_pure.sh', 'w')
