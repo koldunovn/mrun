@@ -71,7 +71,7 @@ print('First KSE = '+str(KSE))
 
 for i in range(nmonths):
 
-    print("\nDate centered:"+str(date_centered)+'\n')
+    print("\nMonth of the simulation: "+date_centered.strftime('%Y-%m')+'\n')
     mon_plus = date_centered + datetime.timedelta(tdiff/24)
     
     forcing_present(PFADFRC ,BUSER, BEXP, date_centered, mon_plus)
@@ -84,25 +84,25 @@ for i in range(nmonths):
 
     generate_batch_moab(MYWRKSHR , PFL, model_exe)
     
-    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
+#    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
     
-    print('Job ID:'+jobid)
+#    print('Job ID:'+jobid)
 
     complete = False
     #print(complete)
-    while complete==False:
+#    while complete==False:
         #print(complete)
-        a = nsub.get_job_state(int(jobid))
-        print("Job state:"+a['EState'])
-        complete = nsub.is_job_done(int(jobid))
-        time.sleep(100)
+#        a = nsub.get_job_state(int(jobid))
+#        print("Job state:"+a['EState'])
+#        complete = nsub.is_job_done(int(jobid))
+#        time.sleep(100)
     #jobid=11  
 
     check_exitcode('my-error.txt')
-    postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP,  date_centered, jobid) 
+#    postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP,  date_centered, jobid) 
     
     
-    print("Next centered date will be: "+str(mon_plus))
+    print("Next month will be: "+mon_plus.strftime('%Y-%m'))
     tdiff = calendar.monthrange(mon_plus.year,mon_plus.month)[1]*24
     print('Number of days in the next month: '+str(tdiff))
     KSA=KSE
