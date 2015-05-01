@@ -139,6 +139,17 @@ def check_exitcode(fname, sendmail=True):
         logging.info('Exit code is not 0, simulation failed')
         raise NameError('Exit code is not 0, simulation failed')
 
+def generate_rm_last_mon( DIR, date):
+    ofile = open('rm_last_mon.sh', 'w')
+    out_init = TEMPLATE_ENVIRONMENT.get_template('rm_last_mon_template').render(year=str(date.year),\
+                                                                                mon=str(date.month).zfill(2),\
+                                                                                DIR=DIR)
+
+    ofile.write(out_init)
+    ofile.close()
+    logging.info("File to remoeve last month created")
+
+
 
 def postprocessing_pure(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid):
     ofile = open('postprocessing_pure.sh', 'w')

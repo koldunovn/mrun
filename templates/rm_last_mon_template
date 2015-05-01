@@ -1,0 +1,7 @@
+#!/bin/bash
+
+rm {{ DIR }}/xe/*{{ year }}{{ mon }}*
+rm {{ DIR }}/xn/*{{ year }}{{ mon }}*
+rm {{ DIR }}/xt/*{{ year }}{{ mon }}*
+
+

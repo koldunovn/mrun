@@ -6,7 +6,7 @@ import datetime
 import calendar
 from subprocess import Popen, PIPE
 import logging
-from rmodel import diff_month, forcing_present, restart_present, preprocessing, generate_INPUT, postprocessing, check_exitcode, generate_batch_moab
+from rmodel import diff_month, forcing_present, restart_present, preprocessing, generate_INPUT, postprocessing, check_exitcode, generate_batch_moab, generate_rm_last_mon
 
 
 
@@ -64,10 +64,10 @@ nmonths = diff_month(edate, sdate)
 
 #timedelta
 
-#KSA = KSA_ini
-#KSE = KSA_ini + KSE_ini
-KSA = 0
-KSE = 10
+KSA = KSA_ini
+KSE = KSA_ini + KSE_ini
+#KSA = 0
+#KSE = 10
 
 date_centered = sdate+datetime.timedelta(14)
 tdiff = KSE_ini
@@ -90,19 +90,21 @@ for i in range(nmonths):
 
     generate_batch_moab(MYWRKSHR , PFL, model_exe)
     
-    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
+#    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
     
-    logging.info('Job ID:'+jobid)
+#    logging.info('Job ID:'+jobid)
 
     complete = False
     #print(complete)
-    while complete==False:
+#    while complete==False:
         #print(complete)
-        a = nsub.get_job_state(int(jobid))
-        logging.debug("Job state:"+a['EState'])
-        complete = nsub.is_job_done(int(jobid))
-        time.sleep(30)
-    #jobid=11  
+#        a = nsub.get_job_state(int(jobid))
+#        logging.debug("Job state:"+a['EState'])
+#        complete = nsub.is_job_done(int(jobid))
+#        time.sleep(30)
+    jobid=11  
+    
+    generate_rm_last_mon(DIR, date_centered)
 
     check_exitcode('my-error.txt')
     postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP,  date_centered, jobid) 
