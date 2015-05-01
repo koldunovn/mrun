@@ -74,7 +74,7 @@ for i in range(nmonths):
     
     preprocessing(PFADFRC, DIR, BUSER, BEXP, date_centered, mon_plus)
     
-    generate_INPUT('INPUT_'+USER+EXP, KSA, KSE, DT, DIR, MYWRKSHR )
+    generate_INPUT(INPUT_file, KSA, KSE, DT, DIR, MYWRKSHR )
     
 #    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
     
