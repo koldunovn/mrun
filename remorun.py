@@ -5,7 +5,7 @@ import time
 import datetime
 import calendar
 from subprocess import Popen, PIPE
-from rmodel import diff_month, forcing_present, restart_present, preprocessing, generate_INPUT, postprocessing, check_exitcode
+from rmodel import diff_month, forcing_present, restart_present, preprocessing, generate_INPUT, postprocessing, check_exitcode, generate_batch_moab
 
 
 
@@ -32,11 +32,15 @@ BUSER = '055'
 BEXP  = '005' 
 #local place for tar forcing files (will be untared during preprocessing)
 
-MYWRKSHR = '/lustre/jhome15/hhh24/hhh242/TEST/mrun/'
-DIR =      MYWRKSHR+'/'+'tmp_'+USER+EXP
-PFADFRC =  MYWRKSHR+'/FORCING/'
-PFADRES =  MYWRKSHR+'/results/'
+MYWRKSHR  = '/lustre/jhome15/hhh24/hhh242/TEST/mrun/'
+DIR       = MYWRKSHR+'/'+'tmp_'+USER+EXP
+PFADFRC   = MYWRKSHR+'/FORCING/'
+PFADRES   = MYWRKSHR+'/results/'
+PFL       = '/lustre/jhome15/hhh24/hhh242/remo2009_mpi_Lake/libs/'
+
+model_exe = 'remo2009_pankaj_cordex_no_glaciers_Lake'  
 INPUT_file = 'INPUT_'+USER+EXP
+
 xfolders = ['xa', 'xe', 'xf', 'xm', 'xn', 'xt']
 firstrun = True
 
@@ -75,20 +79,22 @@ for i in range(nmonths):
     preprocessing(PFADFRC, DIR, PFADRES, BUSER, BEXP, date_centered, mon_plus, firstrun, xfolders )
     
     generate_INPUT(INPUT_file, KSA, KSE, DT, DIR, MYWRKSHR, USER, EXP, BUSER, BEXP )
+
+    generate_batch_moab(MYWRKSHR , PFL, model_exe)
     
-    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
+#    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
     
-    print('Job ID:'+jobid)
+#    print('Job ID:'+jobid)
 
     complete = False
     #print(complete)
-    while complete==False:
+#    while complete==False:
         #print(complete)
-        a = nsub.get_job_state(int(jobid))
-        print("Job state:"+a['EState'])
-        complete = nsub.is_job_done(int(jobid))
-        time.sleep(100)
-    #jobid=11  
+#        a = nsub.get_job_state(int(jobid))
+#        print("Job state:"+a['EState'])
+#        complete = nsub.is_job_done(int(jobid))
+#        time.sleep(100)
+    jobid=11  
 
     check_exitcode('my-error.txt')
     postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP,  date_centered, jobid) 

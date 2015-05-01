@@ -87,6 +87,18 @@ def generate_INPUT(fname, KSA, KSE, DT, DIR, MYWRKSHR, USER, EXP, BUSER, BEXP ):
     ofile.close()
     print("INPUT file is generated")
 
+def generate_batch_moab( MYWRKSHR , PFL, model_exe ):
+    ofile = open('moab_remo_sub.sh', 'w')
+    out_init = TEMPLATE_ENVIRONMENT.get_template('moab_remo_sub_template').render(MYWRKSHR =  MYWRKSHR,\
+                                                               PFL=PFL,\
+                                                               model_exe=model_exe)
+
+    ofile.write(out_init)
+    ofile.close()
+    print("Batch file is generated")
+
+    
+
 def postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid):
     ofile = open('postprocessing.sh', 'w')
     out_init = TEMPLATE_ENVIRONMENT.get_template('postprocessing_template').render( year=str(date.year),\
