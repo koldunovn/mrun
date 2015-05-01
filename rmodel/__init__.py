@@ -44,7 +44,7 @@ def restart_present(path, USER, EXP, date, KSA):
             print('Restart files exist')
         else:
             raise NameError('Restart files do not exist')
-def preprocessing(PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, firstrun, xfolders):
+def preprocessing(MYWRKSHR, PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, firstrun, xfolders):
     
     ofile = open('preprocessing.sh', 'w')
     out_init = TEMPLATE_ENVIRONMENT.get_template('preprocessing_template').render( year=str(date.year),\
@@ -57,7 +57,8 @@ def preprocessing(PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, firstrun, xfo
                                                                                    BUSER=BUSER,\
                                                                                    BEXP=BEXP,\
                                                                                    firstrun=firstrun,\
-                                                                                   xfolders=xfolders )
+                                                                                   xfolders=xfolders,\
+                                                                                   MYWRKSHR=MYWRKSHR)
     ofile.write(out_init)
     ofile.close()
 

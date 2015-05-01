@@ -3,8 +3,8 @@
 {% if firstrun==True %}
 mkdir {{ DIR }}
 mkdir {{ PFADRES }}
-#mkdir {{ DIR }}/log
-#mkdir {{ DIR }}/hclake
+mkdir {{ MYWRKSHR }}/log
+mkdir {{ MYWRKSHR }}/hclake
     {% for xfolder in xfolders %}
 mkdir {{ DIR }}/{{ xfolder }}
     {% endfor %}

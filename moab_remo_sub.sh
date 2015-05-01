@@ -17,6 +17,6 @@ echo "workdir: $PBS_O_WORKDIR"
 NSLOTS=80
 echo "running on $NSLOTS cpus ..."
 
-mpiexec -np $NSLOTS --exports=LD_LIBRARY_PATH  /lustre/jhome15/hhh24/hhh242/remo2009_mpi_Lake/libs//remo2009_pankaj_cordex_no_glaciers_Lake < INPUT
+mpiexec -np $NSLOTS --exports=LD_LIBRARY_PATH  /lustre/jhome15/hhh24/hhh242/sven_remo2008_gletscher_Lake_nk/libs//sven_remo2008 < INPUT
 
 
