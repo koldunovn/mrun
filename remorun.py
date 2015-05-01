@@ -62,7 +62,7 @@ for i in range(nmonths):
     print("Date centered:"+str(date_centered))
     mon_plus = date_centered + datetime.timedelta(tdiff/24)
     
-    forcing_present(PFADFRC ,BUSER, BEXP, date_centered, KSA)
+    forcing_present(PFADFRC ,BUSER, BEXP, date_centered, mon_plus, KSA)
     
     restart_present(DIR, USER, EXP, date_centered, KSA)
     

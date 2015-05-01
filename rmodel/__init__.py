@@ -2,9 +2,6 @@ from jinja2 import Environment, FileSystemLoader
 import os
 from subprocess import Popen, PIPE
 
-def hi():
-    print('hi')
-
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_ENVIRONMENT = Environment( 
     autoescape=False,
@@ -14,14 +11,25 @@ TEMPLATE_ENVIRONMENT = Environment(
 def diff_month(d1, d2):
     return (d1.year - d2.year)*12 + d1.month - d2.month
 
-def forcing_present(path, BUSER, BEXP, date, KSA ):
+def forcing_present(path, BUSER, BEXP, date, ndate, KSA ):
     if KSA > 0:
         ff = '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(date.year), str(date.month).zfill(2))
+        ff2= '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(ndate.year), str(ndate.month).zfill(2))
+
         print ff
         if os.path.isfile(ff):
             print('Forcing tar file exist')
         else:
-            raise NameError('Forcing tar file do not exist')
+            raise NameError('Forcing tar file {} do not exist'.format(ff))
+
+        print ff2
+        if os.path.isfile(ff2):
+            print('Forcing tar file exist')
+        else:
+            raise NameError('Forcing tar file {} do not exist'.format(ff2))
+
+
+
 
 def restart_present(path, USER, EXP, date, KSA):
     if KSA > 0:

@@ -1,0 +1,95 @@
+ &PARCTL
+  NPROCXM=8,
+  NPROCYM=10
+ /
+ &EMGRID
+  MOIE=181,
+  MOJE=161,
+  MOKE=27,
+  PHILU=-5.0,
+  RLALU=2.9,
+  POLPHI=79.95,
+  POLLAM=-123.34,
+  DLAM=0.22,
+  DPHI=0.22,
+/
+ &RUNCTL
+  NHANF={{ KSA }},
+  NHENDE={{ KSE }},
+  YADAT='1960010100',
+  NHEAA=1,
+  NHDEA=1,
+  NHFORA={{ KSE }},
+  NHDFOR=1,
+  NHTAA=6,
+  NHDTA=6,
+  NHDAA=1,
+  NHDDA=1,
+  NHDMXN=1,
+  DT=120,
+  NHDR=6,
+  LQWR=.TRUE.,
+  LMOMON=.FALSE.,
+  LSCEN=.TRUE.,
+  LMOMIT=.TRUE.,
+  LGMON=.TRUE.
+  DLAND=1.5E+4
+  DNOPRC=3.0E+4
+ /
+ &DYNCTL
+ /
+ &PHYCTL
+  LPHY=.TRUE.,
+  HDRAD=1,
+  IEXC=5,
+  LAKKU=.FALSE.,
+  LNEAR=.FALSE.,
+  LVEG=.TRUE.,
+  LINBOX=.TRUE.,
+  LAEROZ=.FALSE.,
+  LECGAD=.FALSE.,
+  LSICED=.FALSE.,
+  L5LAY=.FALSE.,
+  LCOLDC=.TRUE.,
+  LDYNGLA=.FALSE.,
+  IGLAAM=1,
+ /
+ &NMICTL
+  LANMI=.TRUE.,
+  DTNMI=45.0
+ /
+ &PRICTL
+  LDIA=.FALSE.,
+ /
+ &DATEN
+  YADEN='005',
+  YRDEN='005',
+  YEDEN='005',
+  YFDEN='005',
+  YTDEN='005',
+  YUSERA='055',
+  YUSERE='055',
+  YADCAT='/lustre/jwork/hhh24/hhh242/GLACINDIA/tmp_055005//xa/',
+  YRDCAT='/lustre/jwork/hhh24/hhh242/GLACINDIA/tmp_055005//xa/',
+  YEDCAT='/lustre/jwork/hhh24/hhh242/GLACINDIA/tmp_055005//xe/',
+  YFDCAT='/lustre/jwork/hhh24/hhh242/GLACINDIA/tmp_055005//xf/',
+  YMDCAT='/lustre/jwork/hhh24/hhh242/GLACINDIA/tmp_055005//xm/',
+  YTDCAT='/lustre/jwork/hhh24/hhh242/GLACINDIA/tmp_055005//xt/',
+  YNDCAT='/lustre/jwork/hhh24/hhh242/GLACINDIA/tmp_055005//xn/',
+  YTVARN='FIB     ','T       ','U       ','V       ','QD      ','PS      ',
+         'VERVEL  ','QW      ','FI      ','ACLC    ','BLA     ','ALBECH  ',
+         'VAROR   ','FOREST  ','TKE     ','FAO     ','RGCGN   ','FCAP    ',
+         'WSMX    ','GLAC    ','WSECH   ','SN      ','TD      ','TDCL    ',
+         'TSN     ','TD3     ','TD4     ','TD5     ','QDB     ','WL      ',
+         'TSECH   ','TSLECH  ','TSWECH  ','TSIECH  ','SEAICE  ','SICED   ',
+         'QDBL    ','PHI     ','RLA     ',
+  YBDCAT='/lustre/jwork/hhh24/hhh242/libs/',
+  YBDNAM='vgryear_HN_GLC_022R.srv','vltyear_HN_GLC_022R.srv','albyear_HN_GLC_022R.srv',
+  YGDCAT='/lustre/jwork/hhh24/hhh242/data/',
+  YGDNAM='GHG_1850_2011_era.txt',
+  YSRFCAT='/lustre/jwork/hhh24/hhh242/libs/',
+  YSRFNAM='SRFAC_HN_New.srv',
+  YINGCAT='/lustre/jwork/hhh24/hhh242/libs/',
+  YINGNAM='dyngla_ini_dglac02_dglac2.02_SA_1989_Holger_New.srv',
+/
+
