@@ -5,6 +5,7 @@ import time
 import datetime
 import calendar
 from subprocess import Popen, PIPE
+import logging
 from rmodel import diff_month, forcing_present, restart_present, preprocessing, generate_INPUT, postprocessing, check_exitcode, generate_batch_moab
 
 
@@ -14,6 +15,11 @@ TEMPLATE_ENVIRONMENT = Environment(
     autoescape=False,
     loader=FileSystemLoader(os.path.join(PATH, 'templates')),
     trim_blocks=False)
+
+logging.basicConfig(filename='log.log', filemode="w", level=logging.DEBUG, format='%(asctime)s %(message)s',datefmt="%Y-%m-%d %H:%M:%S")
+logging.getLogger().addHandler(logging.StreamHandler())
+
+logging.info('Start script')
 
 #initial date for the whole simmulation
 inidate = datetime.datetime(1960,1,1,0)
@@ -66,12 +72,12 @@ KSE = 10
 date_centered = sdate+datetime.timedelta(14)
 tdiff = KSE_ini
 
-print('First KSA = '+str(KSA))
-print('First KSE = '+str(KSE))
+logging.info('First KSA = '+str(KSA))
+logging.info('First KSE = '+str(KSE))
 
 for i in range(nmonths):
 
-    print("\nMonth of the simulation: "+date_centered.strftime('%Y-%m')+'\n')
+    logging.info("\nMonth of the simulation: "+date_centered.strftime('%Y-%m')+'\n')
     mon_plus = date_centered + datetime.timedelta(tdiff/24)
     
     forcing_present(PFADFRC ,BUSER, BEXP, date_centered, mon_plus)
@@ -84,34 +90,35 @@ for i in range(nmonths):
 
     generate_batch_moab(MYWRKSHR , PFL, model_exe)
     
-#    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
+    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
     
-#    print('Job ID:'+jobid)
+    logging.info('Job ID:'+jobid)
 
     complete = False
     #print(complete)
-#    while complete==False:
+    while complete==False:
         #print(complete)
-#        a = nsub.get_job_state(int(jobid))
-#        print("Job state:"+a['EState'])
-#        complete = nsub.is_job_done(int(jobid))
-#        time.sleep(100)
+        a = nsub.get_job_state(int(jobid))
+        logging.debug("Job state:"+a['EState'])
+        complete = nsub.is_job_done(int(jobid))
+        time.sleep(30)
     #jobid=11  
 
     check_exitcode('my-error.txt')
-#    postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP,  date_centered, jobid) 
+    postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP,  date_centered, jobid) 
     
     
-    print("Next month will be: "+mon_plus.strftime('%Y-%m'))
+    logging.debug("Next month will be: "+mon_plus.strftime('%Y-%m'))
     tdiff = calendar.monthrange(mon_plus.year,mon_plus.month)[1]*24
-    print('Number of days in the next month: '+str(tdiff))
+    logging.debug('Number of days in the next month: '+str(tdiff))
     KSA=KSE
-    print('New KSA: '+str(KSA))
+    logging.debug('New KSA: '+str(KSA))
     KSE=KSA+tdiff
-    print('New KSE: '+str(KSE))
+    logging.debug('New KSE: '+str(KSE))
 
     date_centered = mon_plus
 
+os.system('cp log.log ./log/log_{}'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')))
 
 
 

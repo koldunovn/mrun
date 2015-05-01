@@ -1,6 +1,7 @@
 from jinja2 import Environment, FileSystemLoader
 import os
 from subprocess import Popen, PIPE
+import logging
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_ENVIRONMENT = Environment( 
@@ -16,16 +17,18 @@ def forcing_present(path, BUSER, BEXP, date, ndate):
     ff = '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(date.year), str(date.month).zfill(2))
     ff2= '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(ndate.year), str(ndate.month).zfill(2))
 
-    print ff
+    logging.info(ff)
     if os.path.isfile(ff):
-        print('Forcing tar file exist')
+        logging.info('Forcing tar file exist')
     else:
+        logging.info('Forcing tar file {} do not exist'.format(ff))
         raise NameError('Forcing tar file {} do not exist'.format(ff))
 
-    print ff2
+    logging.info(ff2)
     if os.path.isfile(ff2):
-        print('Forcing tar file exist')
+        logging.info('Forcing tar file exist')
     else:
+        logging.info('Forcing tar file {} do not exist'.format(ff2))
         raise NameError('Forcing tar file {} do not exist'.format(ff2))
 
 
@@ -35,15 +38,18 @@ def restart_present(path, USER, EXP, date, KSA):
     if KSA > 0:
         ffile = '{}/xf/e{}{}f{}{}0100'.format(path, USER, EXP, str(date.year), str(date.month).zfill(2))
         gfile = '{}/xf/e{}{}g{}{}0100'.format(path, USER, EXP, str(date.year), str(date.month).zfill(2))
-        print(ffile)
-        print(gfile)
+        logging.info(ffile)
+        logging.info(gfile)
         isf = os.path.isfile(ffile)
         iss = os.path.isfile(gfile)
         
         if isf and iss:
-            print('Restart files exist')
+            logging.info('Restart files exist')
         else:
+            logging.info('Restart files do not exist')
             raise NameError('Restart files do not exist')
+
+
 def preprocessing(MYWRKSHR, PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, firstrun, xfolders):
     
     ofile = open('preprocessing.sh', 'w')
@@ -63,13 +69,13 @@ def preprocessing(MYWRKSHR, PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, fir
     ofile.close()
 
     os.system('chmod +x ./preprocessing.sh')
-    print('Begin with preprocessing')
+    logging.info('Begin with preprocessing')
     process = Popen('./preprocessing.sh', shell=True,
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
-    print(out)
-    print(err)
-    print('Preprocessing is over')
+    logging.info(out)
+    logging.info(err)
+    logging.info('Preprocessing is over')
 
 
 def generate_INPUT(fname, KSA, KSE, DT, DIR, MYWRKSHR, USER, EXP, BUSER, BEXP ):
@@ -86,7 +92,7 @@ def generate_INPUT(fname, KSA, KSE, DT, DIR, MYWRKSHR, USER, EXP, BUSER, BEXP ):
 
     ofile.write(out_init)
     ofile.close()
-    print("INPUT file is generated")
+    logging.info("INPUT file is generated")
 
 def generate_batch_moab( MYWRKSHR , PFL, model_exe ):
     ofile = open('moab_remo_sub.sh', 'w')
@@ -96,7 +102,7 @@ def generate_batch_moab( MYWRKSHR , PFL, model_exe ):
 
     ofile.write(out_init)
     ofile.close()
-    print("Batch file is generated")
+    logging.info("Batch file is generated")
 
     
 
@@ -115,21 +121,22 @@ def postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid):
 
     ofile.close()
     os.system('chmod +x ./postprocessing.sh')
-    print('postprocessing start')
+    logging.info('postprocessing start')
     process = Popen('./postprocessing.sh', shell=True,
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
-    print(out)
-    print(err)
-    print('postprocessing over')
+    logging.info(out)
+    logging.info(err)
+    logging.info('postprocessing over')
 
 def check_exitcode(fname, sendmail=True):
     f = open(fname)
     a = f.readlines()[2].split()[1]
     if a == '0':
-        print('Exit code is fine')
+        logging.info('Exit code is fine')
         return a
-    else: 
+    else:
+        logging.info('Exit code is not 0, simulation failed')
         raise NameError('Exit code is not 0, simulation failed')
 
 
@@ -148,12 +155,12 @@ def postprocessing_pure(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid)
 
     ofile.close()
     os.system('chmod +x ./postprocessing_pure.sh')
-    print('postprocessing start')
+    print('POSTprocessing begins')
     process = Popen('./postprocessing_pure.sh', shell=True,
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
     print(out)
     print(err)
-    print('postprocessing over')
+    print('POSTprocessing is over')
 
 
