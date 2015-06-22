@@ -25,20 +25,20 @@ logging.info('Start script')
 inidate = datetime.datetime(1960,1,1,0)
 
 #start date for this concrete simulation
-sdate = datetime.datetime(1960,1,1,0)
+sdate = datetime.datetime(2003,8,1,0)
 
 #end date for this concrete simulation (not including this date)
-edate = datetime.datetime(1960,2,1,0)
+edate = datetime.datetime(2005,1,1,0)
 
 DT='120'
 
 USER  = '055'
-EXP   = '006'
+EXP   = '005'
 BUSER = '055'
 BEXP  = '005' 
 #local place for tar forcing files (will be untared during preprocessing)
 
-MYWRKSHR  = '/lustre/jhome15/hhh24/hhh242/TEST/mrun/'
+MYWRKSHR  = '/lustre/jwork/hhh24/hhh242/GLACINDIA/'
 DIR       = MYWRKSHR+'/'+'tmp_'+USER+EXP
 PFADFRC   = MYWRKSHR+'/FORCING/'
 PFADRES   = MYWRKSHR+'/results/'
@@ -88,21 +88,33 @@ for i in range(nmonths):
     
     generate_INPUT(INPUT_file, KSA, KSE, DT, DIR, MYWRKSHR, USER, EXP, BUSER, BEXP )
 
+    time.sleep(10)
+
     generate_batch_moab(MYWRKSHR , PFL, model_exe)
+    time.sleep(10)
+    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
     
-#    jobid, stout, sterr = nsub.submit_job('moab_remo_sub.sh')
-    
-#    logging.info('Job ID:'+jobid)
+    logging.info('Job ID:'+jobid)
 
     complete = False
     #print(complete)
-#    while complete==False:
+    failedjob = 0
+    while complete==False:
         #print(complete)
-#        a = nsub.get_job_state(int(jobid))
-#        logging.debug("Job state:"+a['EState'])
-#        complete = nsub.is_job_done(int(jobid))
-#        time.sleep(30)
-    jobid=11  
+        try:
+            a = nsub.get_job_state(int(jobid))
+            logging.info("Job state:"+a['EState'])
+            failedjob = 0
+        except:
+            if failedjob <= 3:
+                logging.info("Can\'t get information about the job, retrying")
+                failedjob = failedjob + 1
+            else:
+                logging.info("No information about the job, give up")
+                raise NameError('No information about the job, give up')
+        complete = nsub.is_job_done(int(jobid))
+        time.sleep(100)
+    #jobid=11  
     
     generate_rm_last_mon(DIR, date_centered)
 
@@ -119,6 +131,7 @@ for i in range(nmonths):
     logging.debug('New KSE: '+str(KSE))
 
     date_centered = mon_plus
+    firstrun=False
 
 os.system('cp log.log ./log/log_{}'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')))
 

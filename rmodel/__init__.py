@@ -80,11 +80,11 @@ def preprocessing(MYWRKSHR, PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, fir
 
 def generate_INPUT(fname, KSA, KSE, DT, DIR, MYWRKSHR, USER, EXP, BUSER, BEXP ):
     ofile = open('INPUT', 'w')
-    out_init = TEMPLATE_ENVIRONMENT.get_template(fname).render(KSA=KSA,\
-                                                               KSE=KSE,\
+    out_init = TEMPLATE_ENVIRONMENT.get_template(fname).render(KSA=int(KSA),\
+                                                               KSE=int(KSE),\
                                                                DIR=DIR,\
                                                                MYWRKSHR=MYWRKSHR,
-                                                               DT=DT,\
+                                                               DT=int(DT),\
                                                                USER=USER,\
                                                                EXP=EXP,\
                                                                BUSER=BUSER,\
@@ -131,7 +131,13 @@ def postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid):
 
 def check_exitcode(fname, sendmail=True):
     f = open(fname)
-    a = f.readlines()[2].split()[1]
+    
+    try:
+        a = f.readlines()[2].split()[1]
+    except:
+        logging.info('Can\'t read exit code (something is wrong with stderr file)')
+        raise NameError('Exit code is not 0, simulation failed')
+
     if a == '0':
         logging.info('Exit code is fine')
         return a
