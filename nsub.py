@@ -1,4 +1,4 @@
-# For a Moab batch system, this module submits scripts
+# @For a Moab batch system, this module submits scripts
 # and checks to see when they finish. It will run under
 # Linux and Windows (where we have Moab over CCS).
 
