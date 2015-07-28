@@ -83,13 +83,13 @@
          'TSN     ','TD3     ','TD4     ','TD5     ','QDB     ','WL      ',
          'TSECH   ','TSLECH  ','TSWECH  ','TSIECH  ','SEAICE  ','SICED   ',
          'QDBL    ','PHI     ','RLA     ',
-  YBDCAT='{{ MYWRKSHR }}/libs/',
+  YBDCAT='{{ MYWRKHOME }}/libs/',
   YBDNAM='vgryear_HN_GLC_022R.srv','vltyear_HN_GLC_022R.srv','albyear_HN_GLC_022R.srv',
-  YGDCAT='{{ MYWRKSHR }}/data/',
+  YGDCAT='{{ MYWRKHOME }}/data/',
   YGDNAM='GHG_1850_2011_era.txt',
-  YSRFCAT='{{ MYWRKSHR }}/libs/',
+  YSRFCAT='{{ MYWRKHOME }}/libs/',
   YSRFNAM='SRFAC_HN_New.srv',
-  YINGCAT='{{ MYWRKSHR }}/libs/',
+  YINGCAT='{{ MYWRKHOME }}/libs/',
   YINGNAM='dyngla_ini_dglac02_dglac2.02_SA_1989_Holger_New.srv',
 /
 

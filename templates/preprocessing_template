@@ -3,12 +3,14 @@
 {% if firstrun==True %}
 mkdir {{ DIR }}
 mkdir {{ PFADRES }}
-mkdir {{ MYWRKSHR }}/log
+mkdir {{ MYWRKHOME }}/log
 mkdir {{ MYWRKSHR }}/hclake
     {% for xfolder in xfolders %}
 mkdir {{ DIR }}/{{ xfolder }}
     {% endfor %}
 {% endif %}
+
+rm {{ DIR }}/xe/e{{ USER }}{{ EXP }}e_c???_{{ year }}{{ mon }}
 
 cd {{ PFADFRC }}
 echo unpacking a{{ BUSER }}{{ BEXP }}a{{ year }}{{ mon }}.tar

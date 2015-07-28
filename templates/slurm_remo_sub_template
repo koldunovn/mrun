@@ -1,0 +1,50 @@
+#!/bin/bash
+##################################################
+# For btc runs
+
+# set the partition where the job will run
+#SBATCH --partition=compute
+
+# set the number of nodes
+#SBATCH --nodes={{ slurm_nodes }}
+
+# tasks per node
+#SBATCH --ntasks-per-node=24
+
+# set max wallclock time
+#SBATCH --time={{ slurm_time }}
+
+# set name of job
+#SBATCH --job-name="{{ slurm_job_name }}"
+
+# output file
+#SBATCH --output {{  MYWRKHOME }}/my-out.txt
+
+# error file
+#SBATCH --error {{  MYWRKHOME }}/my-error.txt
+
+#You HAVE to set a valid account/project in your job scripts
+#SBATCH --account={{ slurm_account }}
+
+ulimit -s unlimited
+
+source /sw/rhel6-x64/etc/profile.mistral
+module load intel
+module load mxm/3.3.3002
+module load fca/2.5.2379
+module load bullxmpi_mlx/bullxmpi_mlx-1.2.8.3
+
+export OMPI_MCA_pml=cm
+export OMPI_MCA_mtl=mxm
+export MXM_RDMA_PORTS=mlx5_0:1
+
+export OMPI_MCA_coll=^ghc
+export OMPI_MCA_coll_fca_priority=95
+export OMPI_MCA_coll_fca_enable=1
+
+#export OMPI_MCA_ess=^pmi
+#export OMPI_MCA_pubsub=^pmi
+
+
+srun -l --cpu_bind=verbose,cores {{ PFL }}/{{ model_exe }} < INPUT
+

@@ -1,38 +1,135 @@
 #!/bin/bash
+#SBATCH --job-name=postp      # Specify job name
+#SBATCH --partition=shared     # Specify partition name
+#SBATCH --ntasks=1             # Specify max. number of tasks to be invoked
+#SBATCH --mem-per-cpu=2560     # Specify real memory required per CPU in MegaBytes
+#SBATCH --time=00:30:00        # Set a limit on the total run time
+#SBATCH --mail-type=FAIL       # Notify user by email in case of job failure
+#SBATCH --mail-user={{ email }} # Set your e-mail address
+#SBATCH --account={{ slurm_account }}       # Charge resources on this project account
+#SBATCH --output={{ MYWRKHOME }}/log/postprocessing_log.o%j_{{ year }}{{ mon }}    # File name for standard output
+#SBATCH --error={{ MYWRKHOME }}/log/postprocessing_log.e%j_{{ year }}{{ mon }}     # File name for standard error output
 
-cp my-error.txt {{ MYWRKSHR }}/log/my-error_{{ jobid }}.txt
-cp my-out.txt {{ MYWRKSHR }}/log/my-out_{{ jobid }}.txt
+
+cd {{ MYWRKHOME }}
+cp postprocessing.sh ./log/postprocessing.sh_{{ jobid }}_{{ year }}{{ mon }}
+
+cp {{ MYWRKHOME }}/my-error.txt {{ MYWRKHOME }}/log/my-error_{{ jobid }}_{{ year }}{{ mon }}.txt
+cp {{ MYWRKHOME }}/my-out.txt {{ MYWRKHOME }}/log/my-out_{{ jobid }}.txt
 echo copy logs
 
-cp hclake_end.srv8 hclake.srv8
-cp hclake_end.srv8 {{ MYWRKSHR }}/hclake/hclake_{{ year }}{{ mon }}.srv8
+cp {{ MYWRKHOME }}/hclake_end.srv8 {{ MYWRKHOME }}/hclake.srv8
+cp {{ MYWRKHOME }}/hclake_end.srv8 {{ MYWRKSHR }}/hclake/hclake_{{ year }}{{ mon }}.srv8
 echo copy hclake
 
+cd {{ MYWRKHOME }}/post/
+./druintzr_181x161_M < INPUT
+
+CODE="130 131 132 133 153 156 157 135"
+LEVEL="0050 0100 0200 0300 0400 0500 0600 0700 0800 0850 0925 1000"
+
+for C in ${CODE}
+    do
+        for L in ${LEVEL}
+            do
+                ./mitzrpe_GLAC.exe {{ DIR }}/xpt/ {{ DIR }}/xm_tmp/ {{ USER }} {{ EXP }} ${C} ${L} {{ year }} {{ mon }}
+            done
+    done
+
+
 cd {{ DIR }}/xf/ 
-tar -cf e{{ USER }}{{ EXP }}f{{ year }}{{ mon }}0100.tar  e{{ USER }}{{ EXP }}f{{ year }}{{ mon }}0100 e{{ USER }}{{ EXP }}g{{ year }}{{ mon }}0100
-mv e{{ USER }}{{ EXP }}f{{ year }}{{ mon }}0100.tar {{ PFADRES }}
+tar -cf {{ PFADRES }}/e{{ USER }}{{ EXP }}f{{ year }}{{ mon }}.tar  e{{ USER }}{{ EXP }}f{{ year }}{{ mon }}0100 e{{ USER }}{{ EXP }}g{{ year }}{{ mon }}0100
 echo copy restart files
 
 cd {{ DIR }}/xm/
-cp e{{ USER }}{{ EXP }}m{{ year }}{{ mon }}  e{{ USER }}{{ EXP }}s{{ year }}{{ mon }} {{ PFADRES }}
+cp e{{ USER }}{{ EXP }}m{{ year }}{{ mon }}  e{{ USER }}{{ EXP }}s{{ year }}{{ mon }} {{ DIR }}/xm_tmp
+cd {{ DIR }}/xm_tmp
+tar -cf {{ PFADRES }}/e{{ USER }}{{ EXP }}m{{ year }}{{ mon }}.tar * 
+rm {{ DIR }}/xm_tmp/*
 echo copy monthly files
 
+
 cd {{ DIR }}/xt/
-tar -cf e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}????
-mv e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar  {{ PFADRES }}
+tar -cf {{ PFADRES }}/e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}???? e{{ USER }}{{ EXP }}t{{ nyear }}{{ nmon }}0100
 echo copy 6h files
 
 cd {{ DIR }}/xe/
-tar -cf e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar  e{{ USER }}{{ EXP }}e_c???_{{ year }}{{ mon }}
-mv e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar {{ PFADRES }}
+tar -cf {{ PFADRES }}/e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar  e{{ USER }}{{ EXP }}e_c???_{{ year }}{{ mon }}
 echo copy e files
 
 cd {{ DIR }}/xn/
-tar -cf e{{ USER }}{{ EXP }}n{{ year }}{{ mon }}.tar e{{ USER }}{{ EXP }}n_c???_{{ year }}{{ mon }}
-mv e{{ USER }}{{ EXP }}n{{ year }}{{ mon }}.tar {{ PFADRES }}
+tar -cf {{ PFADRES }}/e{{ USER }}{{ EXP }}n{{ year }}{{ mon }}.tar e{{ USER }}{{ EXP }}n_c???_{{ year }}{{ mon }}
 echo copy n files
 
-cd {{ MYWRKSHR }}
+cd {{ DIR }}/xpt/
+tar -cf {{ PFADRES }}/e{{ USER }}{{ EXP }}p{{ year }}{{ mon }}.tar e{{ USER }}{{ EXP }}p_c???_????_{{ year }}{{ mon }}
+echo copy p files
+
+cd {{ PFADRES }}
+
+cat > ftp.in << EOF
+mkdir /hpss/arch/ch0636/u241057/exp{{ EXP }}
+mkdir /hpss/arch/ch0636/u241057/exp{{ EXP }}/year{{ year }}
+
+cd /hpss/arch/ch0636/{{ dkrz_user }}/exp{{ EXP }}/year{{ year }}
+binary
+put e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar
+put e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar
+dir
+bye
+EOF
+pftp < ftp.in > putET{{ year }}{{ mon }}.out
+cp putET{{ year }}{{ mon }}.out {{ MYWRKHOME }}/log/
+rm ftp.in
+
+{% if mon== '12' and packyear==True %}
+
+tar -cf e{{ USER }}{{ EXP }}f{{ year }}.tar e{{ USER }}{{ EXP }}f{{ year }}??.tar
+tar -cf e{{ USER }}{{ EXP }}m{{ year }}.tar e{{ USER }}{{ EXP }}m{{ year }}??.tar e{{ USER }}{{ EXP }}n{{ year }}??.tar
+tar -cf e{{ USER }}{{ EXP }}p{{ year }}.tar e{{ USER }}{{ EXP }}p{{ year }}??.tar
+
+cd {{ MYWRKSHR }}/hclake/
+tar -cf {{ PFADRES }}/hclake_{{ year }}.tar hclake_{{ year }}??.srv8
+cd {{ PFADRES }}
+
+cat > ftp.in << EOF
+cd /hpss/arch/ch0636/{{ dkrz_user }}/exp{{ EXP }}/year{{ year }}
+binary
+put e{{ USER }}{{ EXP }}f{{ year }}.tar
+put e{{ USER }}{{ EXP }}m{{ year }}.tar
+put e{{ USER }}{{ EXP }}p{{ year }}.tar
+put hclake_{{ year }}.tar
+dir
+bye
+EOF
+pftp < ftp.in > putFMP{{ year }}.out
+cp putFMP{{ year }}{{ mon }}.out {{ MYWRKHOME }}/log/
+rm ftp.in
+mv press_interp* {{ MYWRKHOME }}/log/
+
+{% if rmyear==True %}
+cd {{ PFADRES }}
+rm e{{ USER }}{{ EXP }}e{{ year }}??.tar
+rm e{{ USER }}{{ EXP }}t{{ year }}??.tar
+rm e{{ USER }}{{ EXP }}f{{ year }}.tar
+rm e{{ USER }}{{ EXP }}m{{ year }}.tar
+rm e{{ USER }}{{ EXP }}p{{ year }}.tar 
+rm e{{ USER }}{{ EXP }}f{{ year }}??.tar
+rm e{{ USER }}{{ EXP }}m{{ year }}??.tar 
+rm e{{ USER }}{{ EXP }}n{{ year }}??.tar
+rm e{{ USER }}{{ EXP }}p{{ year }}??.tar
+
+rm {{ DIR }}/xa/*
+rm {{ DIR }}/xt/e{{ USER }}{{ EXP }}t{{ year }}??????
+rm {{ DIR }}/xe/e{{ USER }}{{ EXP }}e_c???_{{ year }}??
+rm {{ DIR }}/xn/e{{ USER }}{{ EXP }}n_c???_{{ year }}??
+rm {{ DIR }}/xpt/e{{ USER }}{{ EXP }}p_c???_????_{{ year }}??
+
+{% endif %} # for rm year
+
+{% endif %} # for packyear
+
+
 
 
 
