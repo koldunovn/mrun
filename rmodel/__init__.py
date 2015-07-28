@@ -1,10 +1,12 @@
 from jinja2 import Environment, FileSystemLoader
-import os
+import re, os, time, sys
 from subprocess import Popen, PIPE
 import logging
+import calendar
+import datetime
 
 PATH = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_ENVIRONMENT = Environment( 
+TEMP_ENV = Environment( 
     autoescape=False,
     loader=FileSystemLoader(os.path.join(PATH, '../templates')),
     trim_blocks=False)
@@ -12,21 +14,78 @@ TEMPLATE_ENVIRONMENT = Environment(
 def diff_month(d1, d2):
     return (d1.year - d2.year)*12 + d1.month - d2.month
 
-def forcing_present(path, BUSER, BEXP, date, ndate):
-#    if KSA > 0:
-    ff = '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(date.year), str(date.month).zfill(2))
-    ff2= '{}/a{}{}a{}{}.tar'.format(path, BUSER, BEXP, str(ndate.year), str(ndate.month).zfill(2))
+################# slurm stuff ##########################
 
-    logging.info(ff)
+
+def submit_job(filename):
+    '''Either you get a job id, and your job will run, or you don't
+    and your job won't run, so you check out and err to see why.'''
+    global _submission_script
+    process = Popen("sbatch "+filename, shell=True,
+                    stdout=PIPE, stderr=PIPE)
+    returncode = process.returncode
+    (out,err) = process.communicate()
+    jobid = out.split()[-1]
+    return (jobid, out, err)
+
+def get_job_state(jobid):
+    process = Popen('scontrol show jobid %s' % (str(jobid),), shell=True,
+                    stdout=PIPE, stderr=PIPE)
+    (out,err) = process.communicate()
+    status={}
+    for k in out.split():
+        status[k.split('=')[0]] = k.split('=')[1]
+    #print(out)
+    return status
+
+def is_job_done(jobid):
+    '''Assume job did start, so if the checkjob never heard of this job
+    it must already have finished.'''
+    state=get_job_state(str(jobid))
+    if state:
+        if state['JobState']=='COMPLETED':
+            return True
+        elif state['JobState']=='FAILED':
+            return True
+        elif state['JobState']=='CANCELED':
+            return True
+        else:
+            return False
+    return True
+
+def is_job_failed(jobid):
+    state = get_job_state(str(jobid))
+    if state:
+        if state['JobState']=='FAILED':
+            return True, state['Reason']
+        else:
+            return False, state['Reason']
+    #if we can't get job information there is something wrong
+    return True, state['Reason']
+
+############### job related ####################
+
+
+def forcing_present(cn):
+#    if KSA > 0:
+    ff = '{}/a{}{}a{}{}.tar'.format(cn['PFADFRC'], cn['BUSER'],\
+                                    cn['BEXP'], str(cn['date_present'].year),\
+                                    str(cn['date_present'].month).zfill(2))
+
+    ff2= '{}/a{}{}a{}{}.tar'.format(cn['PFADFRC'], cn['BUSER'],\
+                                    cn['BEXP'], str(cn['date_next'].year),\
+                                    str(cn['date_next'].month).zfill(2))
+
+    logging.debug(ff)
     if os.path.isfile(ff):
-        logging.info('Forcing tar file exist')
+        logging.debug('Forcing tar file exist')
     else:
         logging.info('Forcing tar file {} do not exist'.format(ff))
         raise NameError('Forcing tar file {} do not exist'.format(ff))
 
-    logging.info(ff2)
+    logging.debug(ff2)
     if os.path.isfile(ff2):
-        logging.info('Forcing tar file exist')
+        logging.debug('Forcing tar file for the next month exist')
     else:
         logging.info('Forcing tar file {} do not exist'.format(ff2))
         raise NameError('Forcing tar file {} do not exist'.format(ff2))
@@ -34,37 +93,49 @@ def forcing_present(path, BUSER, BEXP, date, ndate):
 
 
 
-def restart_present(path, USER, EXP, date, KSA):
-    if KSA > 0:
-        ffile = '{}/xf/e{}{}f{}{}0100'.format(path, USER, EXP, str(date.year), str(date.month).zfill(2))
-        gfile = '{}/xf/e{}{}g{}{}0100'.format(path, USER, EXP, str(date.year), str(date.month).zfill(2))
-        logging.info(ffile)
-        logging.info(gfile)
+def restart_present(cn):
+    if cn['KSA'] > 0:
+        ffile = '{}/xf/e{}{}f{}{}0100'.format(cn['DIR'], cn['USER'],\
+                                              cn['EXP'], str(cn['date_present'].year),\
+                                              str(cn['date_present'].month).zfill(2))
+
+        gfile = '{}/xf/e{}{}g{}{}0100'.format(cn['DIR'], cn['USER'],\
+                                              cn['EXP'], str(cn['date_present'].year),\
+                                              str(cn['date_present'].month).zfill(2))
+        logging.debug(ffile)
+        logging.debug(gfile)
         isf = os.path.isfile(ffile)
         iss = os.path.isfile(gfile)
         
         if isf and iss:
-            logging.info('Restart files exist')
+            logging.debug('Restart files exist')
         else:
             logging.info('Restart files do not exist')
-            raise NameError('Restart files do not exist')
+            raise Exception('Restart files do not exist')
+
+def cphclake(cn):
+    mon_minus = cn['date_present'] - datetime.timedelta(cn['tdiff']/24)
+    year_prev = str(mon_minus.year)
+    mon_prev  = str(mon_minus.month)
+    fname     = cn['MYWRKSHR']+'/hclake/hclake_'+year_prev+mon_prev+'.srv8'
+    #print(fname)
+
+    if os.path.isfile(fname):
+        os.system('cp '+fname+' '+cn['MYWRKHOME']+'/hclake.srv8')
+        logging.debug(' copy hclake'+fname)
 
 
-def preprocessing(MYWRKSHR, PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, firstrun, xfolders):
+def preprocessing(cn):
     
     ofile = open('preprocessing.sh', 'w')
-    out_init = TEMPLATE_ENVIRONMENT.get_template('preprocessing_template').render( year=str(date.year),\
-                                                                                   mon=str(date.month).zfill(2),\
-                                                                                   nyear=str(ndate.year),\
-                                                                                   nmon =str(ndate.month).zfill(2),\
-                                                                                   PFADFRC=PFADFRC,\
-                                                                                   PFADRES=PFADRES,\
-                                                                                   DIR=DIR,\
-                                                                                   BUSER=BUSER,\
-                                                                                   BEXP=BEXP,\
-                                                                                   firstrun=firstrun,\
-                                                                                   xfolders=xfolders,\
-                                                                                   MYWRKSHR=MYWRKSHR)
+    
+    cn['year'] = str(cn['date_present'].year)
+    cn['mon']  = str(cn['date_present'].month).zfill(2)
+    cn['nyear'] = str(cn['date_next'].year)
+    cn['nmon']  = str(cn['date_next'].month).zfill(2)
+    
+
+    out_init = TEMP_ENV.get_template(cn['preprocessing_template']).render(cn)
     ofile.write(out_init)
     ofile.close()
 
@@ -73,61 +144,82 @@ def preprocessing(MYWRKSHR, PFADFRC, DIR, PFADRES, BUSER, BEXP, date, ndate, fir
     process = Popen('./preprocessing.sh', shell=True,
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
-    logging.info(out)
-    logging.info(err)
+    logging.debug(out)
+    logging.debug(err)
     logging.info('Preprocessing is over')
 
-
-def generate_INPUT(fname, KSA, KSE, DT, DIR, MYWRKSHR, USER, EXP, BUSER, BEXP ):
+def generate_INPUT(cn):
     ofile = open('INPUT', 'w')
-    out_init = TEMPLATE_ENVIRONMENT.get_template(fname).render(KSA=int(KSA),\
-                                                               KSE=int(KSE),\
-                                                               DIR=DIR,\
-                                                               MYWRKSHR=MYWRKSHR,
-                                                               DT=int(DT),\
-                                                               USER=USER,\
-                                                               EXP=EXP,\
-                                                               BUSER=BUSER,\
-                                                               BEXP=BEXP)
+    cn['YADAT']=cn['inidate'].strftime('%Y%m%d%H')
+    out_init = TEMP_ENV.get_template(cn['INPUT_template']).render(cn)
 
     ofile.write(out_init)
     ofile.close()
-    logging.info("INPUT file is generated")
+    logging.debug("INPUT file is generated")
+
+def generate_INPUT_press_interp(cn):
+    
+    cn['KSE_small'] = calendar.monthrange(cn['date_present'].year,cn['date_present'].month)[1]*24
+    cn['date']      = cn['date_present'].strftime('%Y%m')+'0106'
+    
+    ofile = open(cn['MYWRKHOME']+'/post/INPUT', 'w')
+    out_init = TEMP_ENV.get_template(cn['INPUT_pressure_iterp']).render(cn)
+
+    ofile.write(out_init)
+    ofile.close()
+    logging.debug("INPUT file for pressure interpolation is generated")
 
 def generate_batch_moab( MYWRKSHR , PFL, model_exe ):
     ofile = open('moab_remo_sub.sh', 'w')
-    out_init = TEMPLATE_ENVIRONMENT.get_template('moab_remo_sub_template').render(MYWRKSHR =  MYWRKSHR,\
+    out_init = TEMP_ENV.get_template('moab_remo_sub_template').render(MYWRKSHR =  MYWRKSHR,\
                                                                PFL=PFL,\
                                                                model_exe=model_exe)
 
     ofile.write(out_init)
     ofile.close()
-    logging.info("Batch file is generated")
+    logging.debug("Batch file is generated")
+
+def generate_batch_slurm(cn):
+    ofile = open('slurm_remo_sub.sh', 'w')
+    out_init = TEMP_ENV.get_template(cn['slurm_template']).render(cn)
+
+    ofile.write(out_init)
+    ofile.close()
+    logging.debug("Batch file is generated")
 
     
 
-def postprocessing(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid):
-    ofile = open('postprocessing.sh', 'w')
-    out_init = TEMPLATE_ENVIRONMENT.get_template('postprocessing_template').render( year=str(date.year),\
-                                                                                   mon=str(date.month).zfill(2),\
-                                                                                   PFADFRC=PFADFRC,\
-                                                                                   DIR=DIR,\
-                                                                                   USER=USER,\
-                                                                                   EXP=EXP,\
-                                                                                   MYWRKSHR=MYWRKSHR,\
-                                                                                   PFADRES=PFADRES,\
-                                                                                   jobid=jobid )
-    ofile.write(out_init)
+def postprocessing(cn, jobid, execute='slurm', packyear=True, rmyear=True):
+    '''
+    tfile - template file
+    '''    
+    cn['year']  = str(cn['date_present'].year)
+    cn['mon']   = str(cn['date_present'].month).zfill(2)
+    cn['nyear'] = str(cn['date_next'].year)
+    cn['nmon']  = str(cn['date_next'].month).zfill(2)
+    cn['jobid'] = str(jobid)
+    cn['packyear'] = packyear # if we pack years after mon 12
+    cn['rmyear']   = rmyear   # if we have to clean up after mon 12
 
+    ofile = open('postprocessing.sh', 'w')
+    out_init = TEMP_ENV.get_template(cn['postprocessing_template']).render(cn)
+
+    ofile.write(out_init)
     ofile.close()
-    os.system('chmod +x ./postprocessing.sh')
-    logging.info('postprocessing start')
-    process = Popen('./postprocessing.sh', shell=True,
+    
+    if execute=='shell':
+        os.system('chmod +x ./postprocessing.sh')
+        logging.info('postprocessing start')
+        process = Popen('./postprocessing.sh', shell=True,
                     stdout=PIPE, stderr=PIPE)
-    (out,err) = process.communicate()
-    logging.info(out)
-    logging.info(err)
-    logging.info('postprocessing over')
+        (out,err) = process.communicate()
+        logging.info(out)
+        logging.info(err)
+        logging.info('postprocessing is over')
+    elif execute=='slurm':
+      submit_job("./postprocessing.sh")
+    else:
+      pass
 
 def check_exitcode(fname, sendmail=True):
     f = open(fname)
@@ -145,39 +237,69 @@ def check_exitcode(fname, sendmail=True):
         logging.info('Exit code is not 0, simulation failed')
         raise NameError('Exit code is not 0, simulation failed')
 
-def generate_rm_last_mon( DIR, date):
+def generate_rm_last_mon(cn):
+    cn['year'] = str(cn['date_present'].year)
+    cn['mon']  = str(cn['date_present'].month).zfill(2)
+
     ofile = open('rm_last_mon.sh', 'w')
-    out_init = TEMPLATE_ENVIRONMENT.get_template('rm_last_mon_template').render(year=str(date.year),\
-                                                                                mon=str(date.month).zfill(2),\
-                                                                                DIR=DIR)
+
+    out_init = TEMP_ENV.get_template('rm_last_mon_template').render(cn)
 
     ofile.write(out_init)
     ofile.close()
-    logging.info("File to remoeve last month created")
+    logging.debug("File to remoeve last month created")
 
 
 
-def postprocessing_pure(MYWRKSHR, PFADFRC, PFADRES, DIR, USER, EXP, date, jobid):
-    ofile = open('postprocessing_pure.sh', 'w')
-    out_init = TEMPLATE_ENVIRONMENT.get_template('postprocessing_pure_template').render( year=str(date.year),\
-                                                                                   mon=str(date.month).zfill(2),\
-                                                                                   PFADFRC=PFADFRC,\
-                                                                                   DIR=DIR,\
-                                                                                   USER=USER,\
-                                                                                   EXP=EXP,\
-                                                                                   MYWRKSHR=MYWRKSHR,\
-                                                                                   PFADRES=PFADRES,\
-                                                                                   jobid=jobid )
-    ofile.write(out_init)
+def ftime(fname):
+    fcontent = os.popen('tail -n 100 {}'.format(fname)).read()
+    b = []
+    for line in fcontent.splitlines():
+        if "FORECASTTIME" in line:
+            b.append(int(line.split()[4]))
+    if b:
+        return b[-1]
+    else:
+        return None
 
-    ofile.close()
-    os.system('chmod +x ./postprocessing_pure.sh')
-    print('POSTprocessing begins')
-    process = Popen('./postprocessing_pure.sh', shell=True,
-                    stdout=PIPE, stderr=PIPE)
-    (out,err) = process.communicate()
-    print(out)
-    print(err)
-    print('POSTprocessing is over')
+
+def progressbar(cn, jobstate):
+
+    timepassed =  ftime(cn['MYWRKHOME']+'/my-out.txt')
+    sys.stdout.write('{}\n'.format('State: '+jobstate['JobState']+\
+                                   ', Run Time: '+jobstate['RunTime']+\
+                                   ', Submited: '+jobstate['SubmitTime']))
+    if timepassed:
+        tdif    = cn['KSE']-cn['KSA']
+        tpassed = timepassed-cn['KSA']
+        ratio   = tpassed/float(tdif)
+        filled  = '=' * int( ratio * 50)
+        rest    = '-' * ( 50 - int( ratio * 50) )
+        sys.stdout.write('|' + filled+'>'+rest+ '| {:.2f}%'.format(ratio*100))
+        sys.stdout.write('\r\033[1A')
+        sys.stdout.flush()
+    else:
+        sys.stdout.write('Can\'t get the progress bar :(') 
+        #sys.stdout.write('FORECASTTIME: {}'.format(str(timepassed)))
+        sys.stdout.write('\r\033[1A')
+        sys.stdout.flush()
+
+def final_status(cn, jobid):
+
+    jobstate = get_job_state(int(jobid))
+
+    if jobstate:
+        logging.info('Job State   : '+jobstate['JobState'])
+        logging.info('Run Time    : '+jobstate['RunTime'])
+        logging.info('Submit time : '+jobstate['SubmitTime'])
+        logging.info('Start time  : '+jobstate['StartTime'])
+        logging.info('End time    : '+jobstate['EndTime']) 
+    #check_exitcode('my-error.txt')
+        fail, reason = is_job_failed(jobid)
+        if fail:
+            logging.info('Job failed')
+            logging.info('Reason: '+reason)
+            raise NameError('Simulation failed: '+reason)
+
 
 
