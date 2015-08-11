@@ -1,9 +1,11 @@
 from jinja2 import Environment, FileSystemLoader
-import re, os, time, sys
+import re, os, time, sys, glob, json
 from subprocess import Popen, PIPE
 import logging
 import calendar
 import datetime
+import numpy as np
+
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEMP_ENV = Environment( 
@@ -33,9 +35,13 @@ def get_job_state(jobid):
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
     status={}
-    for k in out.split():
-        status[k.split('=')[0]] = k.split('=')[1]
-    #print(out)
+    if out.split()[0].startswith('JobId'):
+
+        for k in out.split():
+            status[k.split('=')[0]] = k.split('=')[1]
+    else:
+        status = None
+
     return status
 
 def is_job_done(jobid):
@@ -266,23 +272,27 @@ def ftime(fname):
 def progressbar(cn, jobstate):
 
     timepassed =  ftime(cn['MYWRKHOME']+'/my-out.txt')
-    sys.stdout.write('{}\n'.format('State: '+jobstate['JobState']+\
-                                   ', Run Time: '+jobstate['RunTime']+\
-                                   ', Submited: '+jobstate['SubmitTime']))
-    if timepassed:
-        tdif    = cn['KSE']-cn['KSA']
-        tpassed = timepassed-cn['KSA']
-        ratio   = tpassed/float(tdif)
-        filled  = '=' * int( ratio * 50)
-        rest    = '-' * ( 50 - int( ratio * 50) )
-        sys.stdout.write('|' + filled+'>'+rest+ '| {:.2f}%'.format(ratio*100))
-        sys.stdout.write('\r\033[1A')
-        sys.stdout.flush()
+    if jobstate != None:
+
+        sys.stdout.write('{}\n'.format('State: '+jobstate['JobState']+\
+                                       ', Run Time: '+jobstate['RunTime']+\
+                                       ', Submited: '+jobstate['SubmitTime']))
+        if timepassed:
+            tdif    = cn['KSE']-cn['KSA']
+            tpassed = timepassed-cn['KSA']
+            ratio   = tpassed/float(tdif)
+            filled  = '=' * int( ratio * 50)
+            rest    = '-' * ( 50 - int( ratio * 50) )
+            sys.stdout.write('|' + filled+'>'+rest+ '| {:.2f}%'.format(ratio*100))
+            sys.stdout.write('\r\033[1A')
+            sys.stdout.flush()
+        else:
+            sys.stdout.write('Can\'t get the progress bar :(') 
+            #sys.stdout.write('FORECASTTIME: {}'.format(str(timepassed)))
+            sys.stdout.write('\r\033[1A')
+            sys.stdout.flush()
     else:
-        sys.stdout.write('Can\'t get the progress bar :(') 
-        #sys.stdout.write('FORECASTTIME: {}'.format(str(timepassed)))
-        sys.stdout.write('\r\033[1A')
-        sys.stdout.flush()
+        logging.info("The jobstate is None, job information is wrong")
 
 def final_status(cn, jobid):
 
@@ -301,5 +311,75 @@ def final_status(cn, jobid):
             logging.info('Reason: '+reason)
             raise NameError('Simulation failed: '+reason)
 
+def m2netcdf(cn):
+    ll = glob.glob('{}/xm/*'.format(cn['DIR']))
+    ll.sort()
+    for fpath in ll:
+        fname = fpath.split('/')[-1]
+        if os.path.isfile('{}/{}.nc'.format(cn['MONDIR'], fname)) != True:
+
+            process = Popen('cdo -f nc -r copy {} {}/{}.nc'.format(fpath, cn['MONDIR'], fname), shell=True,
+                        stdout=PIPE, stderr=PIPE)
+            (out,err) = process.communicate()
+            print(out)
+            print(err)
+    
+    process = Popen('cdo -O mergetime {0}/e*m??????.nc {0}/months.nc'.format(cn['MONDIR']), shell=True,
+                    stdout=PIPE, stderr=PIPE)
+    (out,err) = process.communicate()
+    print(out)
+    print(err)
+
+    process = Popen('cdo -O fldmean {}/months.nc {}months_fm_{}.nc'.format(cn['MONDIR'],\
+                     cn['HOME']+'/monitor/', cn['EXP']), shell=True,
+                    stdout=PIPE, stderr=PIPE)
+    (out,err) = process.communicate()
+    print(out)
+    print(err)
+
+    return '{}/months.nc'.format(cn['MONDIR'])
 
 
+def get_log_values(a, model_date=np.nan):
+
+    dd = {'submit_date':np.nan,
+          'start_time':np.nan,
+          'end_time':np.nan,
+          'elapsed_time':np.nan,
+          'batch_time':np.nan,
+          'remo_time':np.nan,
+          'date':model_date,
+          'jobid':np.nan}
+    for line in a:
+
+        if line.startswith('* Submit date'):
+            dd['submit_date'] = line.split()[-1]
+            #print line.split()[-1]
+        elif line.startswith('* Start time'):        
+            dd['start_time'] = line.split()[-1]
+        elif line.startswith('* JobID'):
+            dd['jobid'] = line.split()[-1]
+        elif line.startswith('* End time'):
+            dd['end_time'] = line.split()[-1]
+        elif line.startswith('* Elapsed time'):
+            dd['elapsed_time'] = line.split()[-2]
+        elif line.startswith('* batch'):
+            dd['batch_time'] = float(line.split()[4])
+        elif line.startswith('* 0      | sven_remo'):
+            dd['remo_time'] = float(line.split()[4])
+        
+    return dd
+
+def save_log_values(cn):
+    files = glob.glob(cn['MYWRKHOME']+'/log/my-out_*_??????.txt')
+    files.sort()
+    df = []
+    for ff in files:
+        model_date =ff.split('.')[-2][-6:]
+        fl = open(ff)
+        a = fl.readlines()
+        dd = get_log_values(a, model_date)
+        df.append(dd)
+    ofile = open(cn['HOME']+'/monitor/parced_logs_{}.json'.format(cn['EXP']), 'w')
+    json.dump(df, ofile)
+    ofile.close()

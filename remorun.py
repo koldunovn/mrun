@@ -83,8 +83,8 @@ for i in range(cn['nmonths']):
     final_status(cn, jobid)
 
     generate_INPUT_press_interp(cn)
-    postprocessing(cn, jobid, execute='slurm', packyear=False, rmyear=False)    
-    
+    postprocessing(cn, jobid, execute='slurm', rmyear=True)
+
     logging.debug("Next month will be: "+mon_plus.strftime('%Y-%m'))
     cn['tdiff'] = calendar.monthrange(mon_plus.year,mon_plus.month)[1]*24
     logging.debug('Number of days in the next month: '+str(cn['tdiff']))
