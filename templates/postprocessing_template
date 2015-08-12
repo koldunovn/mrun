@@ -15,7 +15,7 @@ cd {{ MYWRKHOME }}
 cp postprocessing.sh ./log/postprocessing.sh_{{ jobid }}_{{ year }}{{ mon }}
 
 cp {{ MYWRKHOME }}/my-error.txt {{ MYWRKHOME }}/log/my-error_{{ jobid }}_{{ year }}{{ mon }}.txt
-cp {{ MYWRKHOME }}/my-out.txt {{ MYWRKHOME }}/log/my-out_{{ jobid }}.txt
+cp {{ MYWRKHOME }}/my-out.txt {{ MYWRKHOME }}/log/my-out_{{ jobid }}_{{ year }}{{ mon }}.txt
 echo copy logs
 
 cp {{ MYWRKHOME }}/hclake_end.srv8 {{ MYWRKHOME }}/hclake.srv8
@@ -82,7 +82,7 @@ pftp < ftp.in > putET{{ year }}{{ mon }}.out
 cp putET{{ year }}{{ mon }}.out {{ MYWRKHOME }}/log/
 rm ftp.in
 
-{% if mon== '12' and packyear==True %}
+{% if mon == endmon and packyear==True %}
 
 tar -cf e{{ USER }}{{ EXP }}f{{ year }}.tar e{{ USER }}{{ EXP }}f{{ year }}??.tar
 tar -cf e{{ USER }}{{ EXP }}m{{ year }}.tar e{{ USER }}{{ EXP }}m{{ year }}??.tar e{{ USER }}{{ EXP }}n{{ year }}??.tar
@@ -103,9 +103,9 @@ dir
 bye
 EOF
 pftp < ftp.in > putFMP{{ year }}.out
-cp putFMP{{ year }}{{ mon }}.out {{ MYWRKHOME }}/log/
+cp putFMP{{ year }}.out {{ MYWRKHOME }}/log/
 rm ftp.in
-mv press_interp* {{ MYWRKHOME }}/log/
+
 
 {% if rmyear==True %}
 cd {{ PFADRES }}
@@ -119,7 +119,7 @@ rm e{{ USER }}{{ EXP }}m{{ year }}??.tar
 rm e{{ USER }}{{ EXP }}n{{ year }}??.tar
 rm e{{ USER }}{{ EXP }}p{{ year }}??.tar
 
-rm {{ DIR }}/xa/*
+rm {{ DIR }}/xa/a{{ USER }}{{ BEXP }}a{{ year }}??????
 rm {{ DIR }}/xt/e{{ USER }}{{ EXP }}t{{ year }}??????
 rm {{ DIR }}/xe/e{{ USER }}{{ EXP }}e_c???_{{ year }}??
 rm {{ DIR }}/xn/e{{ USER }}{{ EXP }}n_c???_{{ year }}??
