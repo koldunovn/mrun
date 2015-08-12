@@ -195,7 +195,7 @@ def generate_batch_slurm(cn):
 
     
 
-def postprocessing(cn, jobid, execute='slurm', packyear=True, rmyear=True):
+def postprocessing(cn, jobid, execute='slurm', packyear=True, rmyear=True, endmon = 12):
     '''
     tfile - template file
     '''    
@@ -204,8 +204,9 @@ def postprocessing(cn, jobid, execute='slurm', packyear=True, rmyear=True):
     cn['nyear'] = str(cn['date_next'].year)
     cn['nmon']  = str(cn['date_next'].month).zfill(2)
     cn['jobid'] = str(jobid)
-    cn['packyear'] = packyear # if we pack years after mon 12
-    cn['rmyear']   = rmyear   # if we have to clean up after mon 12
+    cn['packyear'] = packyear # if we pack years after endmon ( usually 12)
+    cn['rmyear']   = rmyear   # if we have to clean up after endmon (usually 12)
+    cn['endmon']   = str(endmon).zfill(2)   # month of the year after wich we pack everything for a year
 
     ofile = open('postprocessing.sh', 'w')
     out_init = TEMP_ENV.get_template(cn['postprocessing_template']).render(cn)
