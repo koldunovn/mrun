@@ -201,6 +201,7 @@ def postprocessing(cn, jobid, execute='slurm', packyear=True, rmyear=True, endmo
     '''    
     cn['year']  = str(cn['date_present'].year)
     cn['mon']   = str(cn['date_present'].month).zfill(2)
+    cn['day']   = str(calendar.monthrange(cn['date_present'].year,cn['date_present'].month)[1]).zfill(2)
     cn['nyear'] = str(cn['date_next'].year)
     cn['nmon']  = str(cn['date_next'].month).zfill(2)
     cn['jobid'] = str(jobid)
@@ -340,6 +341,27 @@ def m2netcdf(cn):
 
     return '{}/months.nc'.format(cn['MONDIR'])
 
+def at2netcdf(cn):
+    lla = glob.glob('{}/2d/a??????a*'.format(cn['MONDIR']))
+    llt = glob.glob('{}/2d/e??????t*'.format(cn['MONDIR']))
+    lla.sort()
+    llt.sort()
+
+    process = Popen('cdo -f nc -r sellevel,27 -selcode,130,131,132,133,134 {} {}_{}.nc'.format(lla[-1],\
+                     cn['HOME']+'/monitor/a_2d', cn['EXP']), shell=True,
+                    stdout=PIPE, stderr=PIPE)
+    (out,err) = process.communicate()
+    print(out)
+    print(err)
+
+    process = Popen('cdo -f nc -r sellevel,27 -selcode,130,131,132,133,134 {} {}_{}.nc'.format(llt[-1],\
+                     cn['HOME']+'/monitor/t_2d', cn['EXP']), shell=True,
+                    stdout=PIPE, stderr=PIPE)
+    (out,err) = process.communicate()
+    print(out)
+    print(err)
+
+
 
 def get_log_values(a, model_date=np.nan):
 
@@ -380,7 +402,8 @@ def save_log_values(cn):
         fl = open(ff)
         a = fl.readlines()
         dd = get_log_values(a, model_date)
-        df.append(dd)
+        if type(dd['submit_date']) == str:
+            df.append(dd)
     ofile = open(cn['HOME']+'/monitor/parced_logs_{}.json'.format(cn['EXP']), 'w')
     json.dump(df, ofile)
     ofile.close()

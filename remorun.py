@@ -34,9 +34,9 @@ for i in range(cn['nmonths']):
     
     cn['date_next']    = mon_plus
 
-    forcing_present(cn) # checks if 'a' files are in place
-    restart_present(cn) # checks if 'f' and 'g' files are in place
-    preprocessing(cn)   # create directories and untar 'a' files
+   # forcing_present(cn) # checks if 'a' files are in place
+   # restart_present(cn) # checks if 'f' and 'g' files are in place
+   # preprocessing(cn)   # create directories and untar 'a' files
     cphclake(cn)        # GLACINDIA specific
     generate_INPUT(cn)  # generate REMO INPUT file
     
@@ -79,11 +79,15 @@ for i in range(cn['nmonths']):
  ################################################################
 
 
-    generate_rm_last_mon(cn)
-    final_status(cn, jobid)
+    generate_rm_last_mon(cn) #script to remove latest results
+    final_status(cn, jobid)  #check final status of the job
 
-    generate_INPUT_press_interp(cn)
+    generate_INPUT_press_interp(cn) # generate INPUT file for pressure interpolation
+    
+    #Postprocessing call
     postprocessing(cn, jobid, execute='slurm', rmyear=True, endmon = cn['endmon'])
+
+    #Prepare for the next month, update configuration
 
     logging.debug("Next month will be: "+mon_plus.strftime('%Y-%m'))
     cn['tdiff'] = calendar.monthrange(mon_plus.year,mon_plus.month)[1]*24

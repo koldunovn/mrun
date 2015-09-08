@@ -22,6 +22,10 @@ cp {{ MYWRKHOME }}/hclake_end.srv8 {{ MYWRKHOME }}/hclake.srv8
 cp {{ MYWRKHOME }}/hclake_end.srv8 {{ MYWRKSHR }}/hclake/hclake_{{ year }}{{ mon }}.srv8
 echo copy hclake
 
+cp {{ DIR }}/xa/a{{ USER }}{{ BEXP }}a{{ year }}{{ mon }}{{ day }}18  {{ MONDIR }}/2d/
+cp {{ DIR }}/xt/e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}{{ day }}18   {{ MONDIR }}/2d/
+
+
 cd {{ MYWRKHOME }}/post/
 ./druintzr_181x161_M < INPUT
 
