@@ -34,9 +34,9 @@ for i in range(cn['nmonths']):
     
     cn['date_next']    = mon_plus
 
-   # forcing_present(cn) # checks if 'a' files are in place
-   # restart_present(cn) # checks if 'f' and 'g' files are in place
-   # preprocessing(cn)   # create directories and untar 'a' files
+    forcing_present(cn) # checks if 'a' files are in place
+    restart_present(cn) # checks if 'f' and 'g' files are in place
+    preprocessing(cn)   # create directories and untar 'a' files
     cphclake(cn)        # GLACINDIA specific
     generate_INPUT(cn)  # generate REMO INPUT file
     
