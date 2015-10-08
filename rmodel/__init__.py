@@ -314,6 +314,7 @@ def final_status(cn, jobid):
             raise NameError('Simulation failed: '+reason)
 
 def m2netcdf(cn):
+    logging.info('Start m2netcdf')
     ll = glob.glob('{}/xm/*'.format(cn['DIR']))
     ll.sort()
     for fpath in ll:
@@ -323,25 +324,27 @@ def m2netcdf(cn):
             process = Popen('cdo -f nc -r copy {} {}/{}.nc'.format(fpath, cn['MONDIR'], fname), shell=True,
                         stdout=PIPE, stderr=PIPE)
             (out,err) = process.communicate()
-            print(out)
-            print(err)
+            logging.debug(out)
+            logging.debug(err)
     
     process = Popen('cdo -O mergetime {0}/e*m??????.nc {0}/months.nc'.format(cn['MONDIR']), shell=True,
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
-    print(out)
-    print(err)
+    logging.debug(out)
+    logging.debug(err)
 
     process = Popen('cdo -O fldmean {}/months.nc {}months_fm_{}.nc'.format(cn['MONDIR'],\
                      cn['HOME']+'/monitor/', cn['EXP']), shell=True,
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
-    print(out)
-    print(err)
+    logging.debug(out)
+    logging.debug(err)
+    logging.info('Finish m2netcdf')
 
     return '{}/months.nc'.format(cn['MONDIR'])
 
 def at2netcdf(cn):
+    logging.info('2d images')
     lla = glob.glob('{}/2d/a??????a*'.format(cn['MONDIR']))
     llt = glob.glob('{}/2d/e??????t*'.format(cn['MONDIR']))
     lla.sort()
@@ -351,20 +354,20 @@ def at2netcdf(cn):
                      cn['HOME']+'/monitor/a_2d', cn['EXP']), shell=True,
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
-    print(out)
-    print(err)
+    logging.debug(out)
+    logging.debug(err)
 
     process = Popen('cdo -f nc -r sellevel,27 -selcode,130,131,132,133,134 {} {}_{}.nc'.format(llt[-1],\
                      cn['HOME']+'/monitor/t_2d', cn['EXP']), shell=True,
                     stdout=PIPE, stderr=PIPE)
     (out,err) = process.communicate()
-    print(out)
-    print(err)
+    logging.debug(out)
+    logging.debug(err)
 
 
 
 def get_log_values(a, model_date=np.nan):
-
+    
     dd = {'submit_date':np.nan,
           'start_time':np.nan,
           'end_time':np.nan,
@@ -390,10 +393,13 @@ def get_log_values(a, model_date=np.nan):
             dd['batch_time'] = float(line.split()[4])
         elif line.startswith('* 0      | sven_remo'):
             dd['remo_time'] = float(line.split()[4])
+        elif line.startswith('* 0      | remo'):
+            dd['remo_time'] = float(line.split()[4])
         
     return dd
 
 def save_log_values(cn):
+    logging.info('Process logs')
     files = glob.glob(cn['MYWRKHOME']+'/log/my-out_*_??????.txt')
     files.sort()
     df = []
