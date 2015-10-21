@@ -5,7 +5,8 @@ import logging
 import calendar
 import datetime
 import numpy as np
-
+import smtplib
+from email.mime.text import MIMEText
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEMP_ENV = Environment( 
@@ -221,8 +222,8 @@ def postprocessing(cn, jobid, execute='slurm', packyear=True, rmyear=True, endmo
         process = Popen('./postprocessing.sh', shell=True,
                     stdout=PIPE, stderr=PIPE)
         (out,err) = process.communicate()
-        logging.info(out)
-        logging.info(err)
+        logging.debug(out)
+        logging.debug(err)
         logging.info('postprocessing is over')
     elif execute=='slurm':
       submit_job("./postprocessing.sh")
@@ -413,3 +414,20 @@ def save_log_values(cn):
     ofile = open(cn['HOME']+'/monitor/parced_logs_{}.json'.format(cn['EXP']), 'w')
     json.dump(df, ofile)
     ofile.close()
+
+def send_mail(subject, message, cn):
+    sender = 'noreply@koldunov.net'
+    msg = MIMEText(message)
+
+    temp_subg = '{}{}'.format(cn['USER'],cn['EXP'])
+
+    msg['Subject'] = '{} {}'.format(subject,temp_subg)
+    msg['From'] = sender
+    msg['To'] = cn['email']
+    
+    try:
+        smtpObj = smtplib.SMTP('localhost')
+        smtpObj.sendmail(sender, [cn['email']], msg.as_string())         
+        logging.info("Successfully sent email")
+    except SMTPException:
+        logging.info("Error: unable to send email")

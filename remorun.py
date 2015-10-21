@@ -85,7 +85,7 @@ for i in range(cn['nmonths']):
     generate_INPUT_press_interp(cn) # generate INPUT file for pressure interpolation
     
     #Postprocessing call
-    postprocessing(cn, jobid, execute='slurm', rmyear=False, endmon = cn['endmon'])
+    postprocessing(cn, jobid, execute='shell', rmyear=False, endmon = cn['endmon'])
 
     #Prepare for the next month, update configuration
     #os.system('mkdir {}'.format(cn['MONDIR']))
