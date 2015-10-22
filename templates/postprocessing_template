@@ -89,7 +89,9 @@ pftp < ftp.in > putET{{ year }}{{ mon }}.out
 cp putET{{ year }}{{ mon }}.out {{ MYWRKHOME }}/log/
 rm ftp.in
 
+cd {{ MYWRKHOME }}
 python check_archive.py {{ year }}
+cd {{ PFADRES }}
 
 {% if mon == endmon and packyear==True %}
 
@@ -115,7 +117,9 @@ pftp < ftp.in > putFMP{{ year }}.out
 cp putFMP{{ year }}.out {{ MYWRKHOME }}/log/
 rm ftp.in
 
+cd {{ MYWRKHOME }}
 python check_archive.py {{ year }}
+cd {{ PFADRES }}
 
 {% if rmyear==True %}
 cd {{ PFADRES }}
