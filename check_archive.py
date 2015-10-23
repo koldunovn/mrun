@@ -26,7 +26,8 @@ def check_size(fpath, tarline):
         logging.debug('{}: Size OK'.format(fname))
         return True
     else:
-        logging.info('{}: !!!WRONG SIZE!!!')
+        logging.info('{}: !!!WRONG SIZE!!!'.format(fname))
+        send_mail('Wrong size for the file in the archive','''{} '''.format(fname),cn)
         return False
 
 splitted = year.split('_')
@@ -77,7 +78,7 @@ for ftype in ['e','t','f','m','p']:
     elif ftype in ['f','m','p']:
         ll = glob.glob(PFADRES+'/e{}{}{}{}.tar'.format(USER,EXP,ftype,year))
         ll.sort()
-
+    
 
 		#send_mail('Wrong file size in the archive','''{} '''.format(fname),cn)
 
@@ -95,10 +96,15 @@ for ftype in ['e','t','f','m','p']:
                     size_is_ok = check_size(l,tarline)
             
                     if size_is_ok and move:
-                        print('We remove {}'.format(l))
+                        logging.debug('We remove {}'.format(l))
                         sh.rm(l)
-                        if ftype in ['f','m','p']:
+                        if ftype in ['f','p']:
                             sh.rm(sh.glob(l[:-4]+'??.tar'))
+                        elif ftype in ['m']:
+                            sh.rm(sh.glob(l[:-4]+'??.tar'))
+                            # also remove n files
+                            sh.rm(sh.glob(l[:-9]+'n'+l[-8:-4]+'??.tar'))
+
                         
             
                     elif size_is_ok == False:
@@ -110,7 +116,10 @@ for ftype in ['e','t','f','m','p']:
 		#child.sendline('put {}'.format(fname))
         #child.expect('ftp>')
 
-		#send_mail('File is not in the archive','''{} '''.format(fname),cn)
+            send_mail('File is not in the archive','''{} '''.format(fname),cn)
+
+
+
 
 # rm {{ DIR }}/xa/a{{ USER }}{{ BEXP }}a{{ year }}??????
 # rm {{ DIR }}/xt/e{{ USER }}{{ EXP }}t{{ year }}??????
