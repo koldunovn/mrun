@@ -117,27 +117,28 @@ pftp < ftp.in > putFMP{{ year }}.out
 cp putFMP{{ year }}.out {{ MYWRKHOME }}/log/
 rm ftp.in
 
-cd {{ MYWRKHOME }}
-python check_archive.py {{ year }}
-cd {{ PFADRES }}
-
 {% if rmyear==True %}
 cd {{ PFADRES }}
-rm e{{ USER }}{{ EXP }}e{{ year }}??.tar
-rm e{{ USER }}{{ EXP }}t{{ year }}??.tar
-rm e{{ USER }}{{ EXP }}f{{ year }}.tar
-rm e{{ USER }}{{ EXP }}m{{ year }}.tar
-rm e{{ USER }}{{ EXP }}p{{ year }}.tar 
-rm e{{ USER }}{{ EXP }}f{{ year }}??.tar
-rm e{{ USER }}{{ EXP }}m{{ year }}??.tar 
-rm e{{ USER }}{{ EXP }}n{{ year }}??.tar
-rm e{{ USER }}{{ EXP }}p{{ year }}??.tar
 
-rm {{ DIR }}/xa/a{{ BUSER }}{{ BEXP }}a{{ year }}??????
-rm {{ DIR }}/xt/e{{ USER }}{{ EXP }}t{{ year }}??????
-rm {{ DIR }}/xe/e{{ USER }}{{ EXP }}e_c???_{{ year }}??
-rm {{ DIR }}/xn/e{{ USER }}{{ EXP }}n_c???_{{ year }}??
-rm {{ DIR }}/xpt/e{{ USER }}{{ EXP }}p_c???_????_{{ year }}??
+cd {{ MYWRKHOME }}
+python check_archive.py {{ year }}_rm
+cd {{ PFADRES }}
+
+#rm e{{ USER }}{{ EXP }}e{{ year }}??.tar
+#rm e{{ USER }}{{ EXP }}t{{ year }}??.tar
+#rm e{{ USER }}{{ EXP }}f{{ year }}.tar
+#rm e{{ USER }}{{ EXP }}m{{ year }}.tar
+#rm e{{ USER }}{{ EXP }}p{{ year }}.tar 
+#rm e{{ USER }}{{ EXP }}f{{ year }}??.tar
+#rm e{{ USER }}{{ EXP }}m{{ year }}??.tar 
+#rm e{{ USER }}{{ EXP }}n{{ year }}??.tar
+#rm e{{ USER }}{{ EXP }}p{{ year }}??.tar
+
+#rm {{ DIR }}/xa/a{{ BUSER }}{{ BEXP }}a{{ year }}??????
+#rm {{ DIR }}/xt/e{{ USER }}{{ EXP }}t{{ year }}??????
+#rm {{ DIR }}/xe/e{{ USER }}{{ EXP }}e_c???_{{ year }}??
+#rm {{ DIR }}/xn/e{{ USER }}{{ EXP }}n_c???_{{ year }}??
+#rm {{ DIR }}/xpt/e{{ USER }}{{ EXP }}p_c???_????_{{ year }}??
 
 {% endif %} # for rm year
 
