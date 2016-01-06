@@ -1,0 +1,107 @@
+ &PARCTL
+  NPROCXM={{ PROCX }},
+  NPROCYM={{ PROCY }}
+ /
+ &EMGRID
+  MOIE={{ MOIE }},
+  MOJE={{ MOJE }},
+  MOKE=27,
+  PHILU={{ PHILU }},
+  RLALU={{ RLALU }},
+  POLPHI={{ POLPHI }},
+  POLLAM={{ POLLAM }},
+  DLAM={{ DLAM }},
+  DPHI={{ DPHI }},
+/
+ &RUNCTL
+  NHANF={{ KSA }},
+  NHENDE={{ KSE }},
+  YADAT='{{ YADAT }}',
+  NHEAA=1,
+  NHDEA=1,
+  NHFORA={{ KSE }},
+  NHDFOR=1,
+  NHTAA=6,
+  NHDTA=6,
+  NHDAA=6,
+  NHDDA=6,
+  NHDMXN=1,
+  DT={{ DT }},
+  NHDR=6,
+  LQWR={{ LQWR }},
+  LMOMON=.FALSE.,
+  LSCEN=.TRUE.,
+  LMOMIT=.TRUE.,
+  LGMON=.TRUE.,
+  DLAND=1.5E+4,
+  DNOPRC=3.0E+4
+ /
+ &DYNCTL
+ /
+ &PHYCTL
+  LPHY=.TRUE.,
+  HDRAD=1,
+  IEXC=5,
+  LAKKU=.FALSE.,
+  LNEAR=.FALSE.,
+  LVEG=.TRUE.,
+  LINBOX=.TRUE.,
+  LAEROZ=.FALSE.,
+  LECGAD=.FALSE.,
+  LSICED=.FALSE.,
+  L5LAY=.FALSE.,
+  LCOLDC=.TRUE.,
+  {% if LDYNGLA -%}
+  LDYNGLA={{ LDYNGLA }},
+  {% endif -%}
+  {% if IGLAAM -%}
+  IGLAAM={{ IGLAAM }},
+  {% endif -%} 
+ /
+ &NMICTL
+  LANMI=.TRUE.,
+  DTNMI=45.0
+ /
+ &PRICTL
+  LDIA=.FALSE.,
+ /
+ &DATEN
+  YADEN='{{ BEXP }}',
+  YRDEN='{{ BEXP }}',
+  YEDEN='{{ EXP }}',
+  YFDEN='{{ EXP }}',
+  YTDEN='{{ EXP }}',
+  YUSERA='{{ BUSER }}',
+  YUSERE='{{ USER }}',
+  YADCAT='{{ DIR }}/xa/',
+  YRDCAT='{{ DIR }}/xa/',
+  YEDCAT='{{ DIR }}/xe/',
+  YFDCAT='{{ DIR }}/xf/',
+  YMDCAT='{{ DIR }}/xm/',
+  YTDCAT='{{ DIR }}/xt/',
+  YNDCAT='{{ DIR }}/xn/',
+  YTVARN='FIB     ','T       ','U       ','V       ','QD      ','PS      ',
+         'VERVEL  ','QW      ','FI      ','ACLC    ','BLA     ','ALBECH  ',
+         'VAROR   ','FOREST  ','TKE     ','FAO     ','RGCGN   ','FCAP    ',
+         'WSMX    ','GLAC    ','WSECH   ','SN      ','TD      ','TDCL    ',
+         'TSN     ','TD3     ','TD4     ','TD5     ','QDB     ','WL      ',
+         'TSECH   ','TSLECH  ','TSWECH  ','TSIECH  ','SEAICE  ','SICED   ',
+         'QDBL    ','PHI     ','RLA     ',
+  YBDCAT='{{ MYWRKHOME }}/libs/',
+  YBDNAM={{ YBDNAM }},
+  YGDCAT='{{ MYWRKHOME }}/data/',
+  YGDNAM='{{ YGDNAM }}',
+  {% if YSRFCAT -%}
+  YSRFCAT='{{ MYWRKHOME }}/libs/',
+  {% endif -%}
+  {% if YSRFNAM -%}
+  YSRFNAM='SRFAC_HN_New.srv',
+  {% endif -%}
+  {% if YSRFNAM -%}
+  YINGCAT='{{ MYWRKHOME }}/libs/',
+  {% endif -%}
+  {% if YSRFNAM -%}
+  YINGNAM='dyngla_ini_southasia_2000_HM_GLACINDIA_Mask.srv',
+  {% endif -%}
+/
+

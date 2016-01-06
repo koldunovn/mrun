@@ -31,7 +31,7 @@ ulimit -s unlimited
 source /sw/rhel6-x64/etc/profile.mistral
 module load intel/15.0.1
 module load mxm/3.3.3002
-module load fca/2.5.2379
+module load fca/2.5.2393
 module load bullxmpi_mlx/bullxmpi_mlx-1.2.8.3
 
 export OMPI_MCA_pml=cm

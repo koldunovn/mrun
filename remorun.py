@@ -16,7 +16,7 @@ TEMPLATE_ENVIRONMENT = Environment(
     loader=FileSystemLoader(os.path.join(PATH, 'templates')),
     trim_blocks=False)
 
-logging.basicConfig(filename='log.log', filemode="w", level=logging.INFO, \
+logging.basicConfig(filename='log.log', filemode="w", level=logging.DEBUG, \
                     format='%(asctime)s %(message)s',datefmt="%Y-%m-%d %H:%M:%S")
 logging.getLogger().addHandler(logging.StreamHandler())
 
@@ -34,8 +34,8 @@ for i in range(cn['nmonths']):
     
     cn['date_next']    = mon_plus
 
-    forcing_present(cn) # checks if 'a' files are in place
-    restart_present(cn) # checks if 'f' and 'g' files are in place
+#    forcing_present(cn) # checks if 'a' files are in place
+#    restart_present(cn) # checks if 'f' and 'g' files are in place
     preprocessing(cn)   # create directories and untar 'a' files
     cphclake(cn)        # GLACINDIA specific
     generate_INPUT(cn)  # generate REMO INPUT file
@@ -85,7 +85,7 @@ for i in range(cn['nmonths']):
     generate_INPUT_press_interp(cn) # generate INPUT file for pressure interpolation
     
     #Postprocessing call
-    postprocessing(cn, jobid, execute='slurm', rmyear=True, endmon = cn['endmon'])
+    postprocessing(cn, jobid, execute='shell', rmyear=True, endmon = cn['endmon'])
 
     #Prepare for the next month, update configuration
     #os.system('mkdir {}'.format(cn['MONDIR']))
