@@ -261,11 +261,12 @@ def generate_rm_last_mon(cn):
 
 
 def ftime(fname):
+    r = re.compile('\d{8}')
     fcontent = os.popen('tail -n 100 {}'.format(fname)).read()
     b = []
     for line in fcontent.splitlines():
         if "FORECASTTIME" in line:
-            b.append(int(line.split()[4]))
+            b.append(int(r.findall(line)[0]))
     if b:
         return b[-1]
     else:

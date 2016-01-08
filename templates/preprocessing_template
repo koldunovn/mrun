@@ -2,6 +2,7 @@
 
 {% if firstrun==True %}
 mkdir -p {{ DIR }}
+mkdir {{ PFADFRC }}
 mkdir {{ PFADRES }}
 mkdir {{ MYWRKHOME }}/log
 mkdir {{ MYWRKSHR }}/hclake
