@@ -54,7 +54,7 @@ def is_job_done(jobid):
             return True
         elif state['JobState']=='FAILED':
             return True
-        elif state['JobState']=='CANCELED':
+        elif state['JobState']=='CANCELLED':
             return True
         else:
             return False
