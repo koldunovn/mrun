@@ -1,0 +1,13 @@
+#!/bin/bash -x
+#SBATCH --nodes={{ slurm_nodes }}
+#SBATCH --ntasks={{ slurm_nodes*24 }}
+#SBATCH --ntasks-per-node=24
+#SBATCH --output={{  MYWRKHOME }}/my-out.txt
+#SBATCH --error={{  MYWRKHOME }}/my-error.txt
+#SBATCH --time={{ slurm_time }}
+#SBATCH --partition=batch
+ 
+module load intel/2015.07
+
+srun {{ PFL }}/{{ model_exe }} < INPUT
+
