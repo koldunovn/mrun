@@ -16,7 +16,7 @@ TEMPLATE_ENVIRONMENT = Environment(
     loader=FileSystemLoader(os.path.join(PATH, 'templates')),
     trim_blocks=False)
 
-logging.basicConfig(filename='log.log', filemode="w", level=logging.DEBUG, \
+logging.basicConfig(filename='log.log', filemode="w", level=logging.INFO, \
                     format='%(asctime)s %(message)s',datefmt="%Y-%m-%d %H:%M:%S")
 logging.getLogger().addHandler(logging.StreamHandler())
 
@@ -34,11 +34,11 @@ for i in range(cn['nmonths']):
     
     cn['date_next']    = mon_plus
 
-#    forcing_present(cn) # checks if 'a' files are in place
-#    restart_present(cn) # checks if 'f' and 'g' files are in place
-#    preprocessing(cn)   # create directories and untar 'a' files
+    forcing_present(cn) # checks if 'a' files are in place
+    restart_present(cn) # checks if 'f' and 'g' files are in place
+    preprocessing(cn)   # create directories and untar 'a' files
     cphclake(cn)        # GLACINDIA specific
-#    generate_INPUT(cn)  # generate REMO INPUT file
+    generate_INPUT(cn)  # generate REMO INPUT file
     
     time.sleep(1)
 
@@ -58,13 +58,13 @@ for i in range(cn['nmonths']):
     failedjob = 0
 
     while complete==False:
-        time.sleep(5)
+        time.sleep(10)
         #print(complete)
         try:
             jobstate = get_job_state(int(jobid))
             failedjob = 0 #reset counter of failed attempts to get the job info              
         except:
-            if failedjob <= 3:
+            if failedjob <= 7:
                 logging.info("Can\'t get information about the job, retrying")
                 failedjob = failedjob + 1
             else:
@@ -82,17 +82,17 @@ for i in range(cn['nmonths']):
 #    generate_rm_last_mon(cn) #script to remove latest results
     final_status(cn, jobid)  #check final status of the job
 
- #   generate_INPUT_press_interp(cn) # generate INPUT file for pressure interpolation
+    generate_INPUT_press_interp(cn) # generate INPUT file for pressure interpolation
     
     #Postprocessing call
     postprocessing(cn, jobid, execute='shell', rmyear=True, endmon = cn['endmon'])
 
     #Prepare for the next month, update configuration
     #os.system('mkdir {}'.format(cn['MONDIR']))
-#    m2netcdf(cn)
+    m2netcdf(cn)
     save_log_values(cn)
-#    os.system('cp config.py {}/monitor/config_{}.py'.format(cn['HOME'],cn['EXP']))
-#    at2netcdf(cn)
+    os.system('cp config.py {}/monitor/config_{}.py'.format(cn['HOME'],cn['EXP']))
+    at2netcdf(cn)
 
     logging.debug("Next month will be: "+mon_plus.strftime('%Y-%m'))
     cn['tdiff'] = calendar.monthrange(mon_plus.year,mon_plus.month)[1]*24
