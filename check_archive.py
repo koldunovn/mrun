@@ -1,3 +1,7 @@
+'''
+Checks if the
+'''
+
 import pexpect
 import glob
 import os
@@ -20,6 +24,10 @@ logging.basicConfig(filename='log_check_archive.log', filemode="w", level=loggin
 logging.getLogger().addHandler(logging.StreamHandler())
 
 def check_size(fpath, tarline):
+    '''
+    fpath   - path to the tarfile
+    tarline - string that we got from the archive with the file size
+    '''
     orig_size = os.path.getsize(fpath)
     tar_size  = tarline.split()[4]
     if orig_size == int(tar_size):
@@ -30,6 +38,7 @@ def check_size(fpath, tarline):
         send_mail('Wrong size for the file in the archive','''{} '''.format(fname),cn)
         return False
 
+#process input to the script, remove files if year_rm is provided
 splitted = year.split('_')
 
 if len(splitted)==2:
@@ -42,10 +51,10 @@ if len(splitted)==2:
 else:
     year = year
     move = False
-    print year
+    print(year)
 
 
-
+#read information from configuration file
 PFADRES   = cn['PFADRES']
 EXP       = cn['EXP']
 USER      = cn['USER']
@@ -54,7 +63,7 @@ DIR       = cn['DIR']
 BEXP      = cn['BEXP']
 BUSER     = cn['BUSER']
 
-
+#login to archive and get listing of the directory
 child = pexpect.spawn('pftp')
 child.expect('ftp>')
 child.sendline('prompt')
@@ -70,6 +79,7 @@ a = child.before
 
 errors = 0
 
+#loop over all file types
 for ftype in ['e','t','f','m','p']:
 
     if ftype in ['e','t']:
