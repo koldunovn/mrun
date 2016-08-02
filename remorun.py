@@ -16,7 +16,7 @@ TEMPLATE_ENVIRONMENT = Environment(
     loader=FileSystemLoader(os.path.join(PATH, 'templates')),
     trim_blocks=False)
 
-logging.basicConfig(filename='log.log', filemode="w", level=logging.INFO, \
+logging.basicConfig(filename='log.log', filemode="w", level=logging.DEBUG, \
                     format='%(asctime)s %(message)s',datefmt="%Y-%m-%d %H:%M:%S")
 logging.getLogger().addHandler(logging.StreamHandler())
 
@@ -34,9 +34,9 @@ for i in range(cn['nmonths']):
     
     cn['date_next']    = mon_plus
 
-    forcing_present(cn) # checks if 'a' files are in place
-    restart_present(cn) # checks if 'f' and 'g' files are in place
-    preprocessing(cn)   # create directories and untar 'a' files
+#    forcing_present(cn) # checks if 'a' files are in place
+#    restart_present(cn) # checks if 'f' and 'g' files are in place
+#    preprocessing(cn)   # create directories and untar 'a' files
     cphclake(cn)        # GLACINDIA specific
     generate_INPUT(cn)  # generate REMO INPUT file
     
@@ -89,10 +89,10 @@ for i in range(cn['nmonths']):
 
     #Prepare for the next month, update configuration
     #os.system('mkdir {}'.format(cn['MONDIR']))
-    m2netcdf(cn)
+#    m2netcdf(cn)
     save_log_values(cn)
     os.system('cp config.py {}/monitor/config_{}.py'.format(cn['HOME'],cn['EXP']))
-    at2netcdf(cn)
+#    at2netcdf(cn)
 
     logging.debug("Next month will be: "+mon_plus.strftime('%Y-%m'))
     cn['tdiff'] = calendar.monthrange(mon_plus.year,mon_plus.month)[1]*24
