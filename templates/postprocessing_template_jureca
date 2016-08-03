@@ -1,18 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=postp      # Specify job name
-#SBATCH --partition=prepost     # Specify partition name
-#SBATCH --ntasks=1             # Specify max. number of tasks to be invoked
-#SBATCH --mem-per-cpu=2560     # Specify real memory required per CPU in MegaBytes
-#SBATCH --time=00:10:00        # Set a limit on the total run time
-#SBATCH --mail-type=FAIL       # Notify user by email in case of job failure
+#SBATCH --nodes=1
+#SBATCH --ntasks=24 
+#SBATCH --ntasks-per-node=24
+#SBATCH --time={{ slurm_time }}
+#SBATCH --partition=devel
 #SBATCH --mail-user={{ email }} # Set your e-mail address
-#SBATCH --account={{ slurm_account }}       # Charge resources on this project account
 #SBATCH --output={{ MYWRKHOME }}/log/postprocessing_log.o%j_{{ year }}{{ mon }}    # File name for standard output
 #SBATCH --error={{ MYWRKHOME }}/log/postprocessing_log.e%j_{{ year }}{{ mon }}     # File name for standard error output
-
-#source /sw/rhel6-x64/etc/profile.mistral
-#module load pftp
-#module load python/2.7-ve0
 
 cd {{ MYWRKHOME }}
 cp postprocessing.sh ./log/postprocessing.sh_{{ jobid }}_{{ year }}{{ mon }}
@@ -73,6 +67,11 @@ tar -cf {{ PFADRES }}/e{{ USER }}{{ EXP }}p{{ year }}{{ mon }}.tar e{{ USER }}{{
 echo copy p files
 
 cd {{ PFADRES }}
+echo copy to dkrz e-files
+echo $PWD
+scp -v -i {{ ssh_key_path }} {{ PFADRES }}/e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} > oute
+echo copy to dkrz t-files
+scp -i {{ ssh_key_path }} e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} > outt
 
 #cat > ftp.in << EOF
 #mkdir /hpss/arch/ch0636/u241057/exp{{ EXP }}
@@ -91,9 +90,10 @@ cd {{ PFADRES }}
 
 cd {{ MYWRKHOME }}
 #python check_archive.py {{ year }}
-#cd {{ PFADRES }}
 
 {% if mon == endmon and packyear==True %}
+
+cd {{ PFADRES }}
 
 tar -cf e{{ USER }}{{ EXP }}f{{ year }}.tar e{{ USER }}{{ EXP }}f{{ year }}??.tar
 tar -cf e{{ USER }}{{ EXP }}m{{ year }}.tar e{{ USER }}{{ EXP }}m{{ year }}??.tar e{{ USER }}{{ EXP }}n{{ year }}??.tar
@@ -102,7 +102,10 @@ tar -cf e{{ USER }}{{ EXP }}p{{ year }}.tar e{{ USER }}{{ EXP }}p{{ year }}??.ta
 cd {{ MYWRKSHR }}/hclake/
 tar -cf {{ PFADRES }}/hclake_{{ year }}.tar hclake_{{ year }}??.srv8
 cd {{ PFADRES }}
-
+scp -i {{ ssh_key_path }} e{{ USER }}{{ EXP }}f{{ year }}.tar  {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }}
+scp -i {{ ssh_key_path }} e{{ USER }}{{ EXP }}m{{ year }}.tar  {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }}
+scp -i {{ ssh_key_path }} e{{ USER }}{{ EXP }}p{{ year }}.tar  {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }}
+scp -i {{ ssh_key_path }} hclake_{{ year }}.tar  {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }}
 #cat > ftp.in << EOF
 #cd /hpss/arch/ch0636/{{ dkrz_user }}/exp{{ EXP }}/year{{ year }}
 #binary
@@ -143,7 +146,7 @@ cd {{ PFADRES }}
 #{% endif %} # for rm year
 
 {% endif %} # for packyear
-
+cd {{ MYWRKHOME }}
 
 
 

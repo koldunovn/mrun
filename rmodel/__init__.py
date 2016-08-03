@@ -7,6 +7,7 @@ import datetime
 import numpy as np
 import smtplib
 from email.mime.text import MIMEText
+import sh
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEMP_ENV = Environment( 
@@ -226,7 +227,11 @@ def postprocessing(cn, jobid, execute='slurm', packyear=True, rmyear=True, endmo
         logging.debug(err)
         logging.info('postprocessing is over')
     elif execute=='slurm':
-      submit_job("./postprocessing.sh")
+        submit_job("./postprocessing.sh")
+    elif execute=='back':
+        os.system('chmod +x ./postprocessing.sh')
+        logging.info('postprocessing start in background mode, good luck...')
+        sh.bash('./postprocessing.sh', _bg=True, _timeout=1200, _out='o.txt', _err='e.txt')
     else:
       pass
 
