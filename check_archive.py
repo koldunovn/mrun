@@ -69,9 +69,10 @@ if cn['archive'] == 'mistral':
     logstring = 'sftp  -i {} {}@{}:{}'.format(cn['ssh_key_path'],cn['dkrz_user'], cn['dkrz_computer'],cn['folder_on_dkrz'])
     child = pexpect.spawn(logstring)
     child.expect('sftp>')
-    child.sendline('ls -l e*{}*.tar'.format(year))
+    child.sendline('ls -l')
     child.expect('sftp>')
     a = child.before
+    print(a)
 elif cn['archive'] == 'dkrz_archive':
   
     child = pexpect.spawn('pftp')
@@ -88,20 +89,18 @@ elif cn['archive'] == 'dkrz_archive':
     a = child.before
 
 errors = 0
-
 #loop over all file types
 for ftype in ['e','t','f','m','p']:
 
     if ftype in ['e','t']:
-        ll = glob.glob(PFADRES+'/e{}{}{}{}??.tar'.format(USER,EXP,ftype,year))
+        ll = glob.glob(cn['PFADRES']+'/e{}{}{}{}??.tar'.format(cn['USER'],cn['EXP'],ftype,year))
         ll.sort()
     elif ftype in ['f','m','p']:
-        ll = glob.glob(PFADRES+'/e{}{}{}{}.tar'.format(USER,EXP,ftype,year))
+        ll = glob.glob(cn['PFADRES']+'/e{}{}{}{}.tar'.format(cn['USER'],cn['EXP'],ftype,year))
         ll.sort()
     
 
 		#send_mail('Wrong file size in the archive','''{} '''.format(fname),cn)
-
 
     for l in ll:
 		## check if the file is in the archive
