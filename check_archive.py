@@ -28,6 +28,7 @@ def check_size(fpath, tarline):
     fpath   - path to the tarfile
     tarline - string that we got from the archive with the file size
     '''
+    fname = os.path.split(fpath)[-1]
     orig_size = os.path.getsize(fpath)
     tar_size  = tarline.split()[4]
     if orig_size == int(tar_size):
@@ -64,18 +65,27 @@ BEXP      = cn['BEXP']
 BUSER     = cn['BUSER']
 
 #login to archive and get listing of the directory
-child = pexpect.spawn('pftp')
-child.expect('ftp>')
-child.sendline('prompt')
-child.expect('ftp>')
-child.sendline('lcd {}'.format(PFADRES))
-child.expect('ftp>')
-child.sendline('cd ch0636/{}/exp{}/year{}/'.format(dkrz_user,EXP,year))
-child.expect('ftp>')
-child.sendline('dir')
-child.expect('ftp>')
-logging.debug(child.before)
-a = child.before
+if cn['archive'] == 'mistral':
+    logstring = 'sftp  -i {} {}@{}:{}'.format(cn['ssh_key_path'],cn['dkrz_user'], cn['dkrz_computer'],cn['folder_on_dkrz'])
+    child = pexpect.spawn(logstring)
+    child.expect('sftp>')
+    child.sendline('ls -l e*{}*.tar'.format(year))
+    child.expect('sftp>')
+    a = child.before
+elif cn['archive'] == 'dkrz_archive':
+  
+    child = pexpect.spawn('pftp')
+    child.expect('ftp>')
+    child.sendline('prompt')
+    child.expect('ftp>')
+    child.sendline('lcd {}'.format(PFADRES))
+    child.expect('ftp>')
+    child.sendline('cd ch0636/{}/exp{}/year{}/'.format(dkrz_user,EXP,year))
+    child.expect('ftp>')
+    child.sendline('dir')
+    child.expect('ftp>')
+    logging.debug(child.before)
+    a = child.before
 
 errors = 0
 

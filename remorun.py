@@ -107,7 +107,7 @@ for i in range(cn['nmonths']):
 
 os.system('cp log.log ./log/log_{}'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')))
 if cn['post_execution'] == 'back':
-    logging.info('whait 10 minutes while background processing is over')
+    logging.info('wait for 10 minutes while background processing is over')
     time.sleep(600)
 
 

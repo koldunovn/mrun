@@ -72,9 +72,9 @@ echo copy p files
 cd {{ PFADRES }}
 echo copy to dkrz e-files
 echo $PWD
-scp  -i {{ ssh_key_path }} {{ PFADRES }}/e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} > oute
+scp  -i {{ ssh_key_path }} {{ PFADRES }}/e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} 
 echo copy to dkrz t-files
-scp -i {{ ssh_key_path }} e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} > outt
+scp -i {{ ssh_key_path }} e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} 
 
 #cat > ftp.in << EOF
 #mkdir /hpss/arch/ch0636/u241057/exp{{ EXP }}
