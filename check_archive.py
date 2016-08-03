@@ -69,7 +69,7 @@ if cn['archive'] == 'mistral':
     logstring = 'sftp  -i {} {}@{}:{}'.format(cn['ssh_key_path'],cn['dkrz_user'], cn['dkrz_computer'],cn['folder_on_dkrz'])
     child = pexpect.spawn(logstring)
     child.expect('sftp>')
-    child.sendline('ls -l')
+    child.sendline('ls -l e*{}*.tar'.format(year))
     child.expect('sftp>')
     a = child.before
     print(a)

@@ -10,6 +10,7 @@
 
 module load intel-para/2016a
 module load CDO/1.7.1
+export PATH="/homec/hhh24/hhh242/miniconda/bin/:$PATH"
 
 cd {{ MYWRKHOME }}
 cp postprocessing.sh ./log/postprocessing.sh_{{ jobid }}_{{ year }}{{ mon }}
@@ -92,7 +93,7 @@ scp -i {{ ssh_key_path }} e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar {{ dkrz_u
 #rm ftp.in
 
 cd {{ MYWRKHOME }}
-#python check_archive.py {{ year }}
+python check_archive.py {{ year }}
 
 {% if mon == endmon and packyear==True %}
 
@@ -126,8 +127,8 @@ scp -i {{ ssh_key_path }} hclake_{{ year }}.tar  {{ dkrz_user }}@{{ dkrz_compute
 #{% if rmyear==True %}
 #cd {{ PFADRES }}
 
-#cd {{ MYWRKHOME }}
-#python check_archive.py {{ year }}_rm
+cd {{ MYWRKHOME }}
+python check_archive.py {{ year }}_rm
 #cd {{ PFADRES }}
 
 #rm e{{ USER }}{{ EXP }}e{{ year }}??.tar

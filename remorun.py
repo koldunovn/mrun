@@ -89,10 +89,10 @@ for i in range(cn['nmonths']):
 
     #Prepare for the next month, update configuration
     #os.system('mkdir {}'.format(cn['MONDIR']))
-#    m2netcdf(cn)
+    m2netcdf(cn)
     save_log_values(cn)
     os.system('cp config.py {}/monitor/config_{}.py'.format(cn['HOME'],cn['EXP']))
-#    at2netcdf(cn)
+    at2netcdf(cn)
 
     logging.debug("Next month will be: "+mon_plus.strftime('%Y-%m'))
     cn['tdiff'] = calendar.monthrange(mon_plus.year,mon_plus.month)[1]*24
