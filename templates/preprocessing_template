@@ -13,6 +13,7 @@ mkdir {{ DIR }}/{{ xfolder }}
 {% endif %}
 
 rm {{ DIR }}/xe/e{{ USER }}{{ EXP }}e_c???_{{ year }}{{ mon }}
+rm {{ DIR }}/xn/e{{ USER }}{{ EXP }}n_c???_{{ year }}{{ mon }}
 
 cd {{ PFADFRC }}
 echo unpacking a{{ BUSER }}{{ BEXP }}a{{ year }}{{ mon }}.tar

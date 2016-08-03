@@ -8,6 +8,9 @@
 #SBATCH --output={{ MYWRKHOME }}/log/postprocessing_log.o%j_{{ year }}{{ mon }}    # File name for standard output
 #SBATCH --error={{ MYWRKHOME }}/log/postprocessing_log.e%j_{{ year }}{{ mon }}     # File name for standard error output
 
+module load intel-para/2016a
+module load CDO/1.7.1
+
 cd {{ MYWRKHOME }}
 cp postprocessing.sh ./log/postprocessing.sh_{{ jobid }}_{{ year }}{{ mon }}
 
@@ -69,7 +72,7 @@ echo copy p files
 cd {{ PFADRES }}
 echo copy to dkrz e-files
 echo $PWD
-scp -v -i {{ ssh_key_path }} {{ PFADRES }}/e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} > oute
+scp  -i {{ ssh_key_path }} {{ PFADRES }}/e{{ USER }}{{ EXP }}e{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} > oute
 echo copy to dkrz t-files
 scp -i {{ ssh_key_path }} e{{ USER }}{{ EXP }}t{{ year }}{{ mon }}.tar {{ dkrz_user }}@{{ dkrz_computer }}:{{ folder_on_dkrz }} > outt
 
