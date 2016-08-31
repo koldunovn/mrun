@@ -1,3 +1,10 @@
+# Example of the REMO run script, that use rmodel module
+#
+# Now the assumption is that REMO is calculated for one month on every batch job submission.
+#
+# Nikolay Koldunov, 2016
+#
+
 from jinja2 import Environment, FileSystemLoader
 import os
 import sys
@@ -9,41 +16,55 @@ import logging
 from rmodel import * 
 from config import cn
 
-
+# Setupt junja 2 templates
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_ENVIRONMENT = Environment( 
     autoescape=False,
     loader=FileSystemLoader(os.path.join(PATH, 'templates')),
     trim_blocks=False)
 
+# Setup logging. Change "level" to "logging.DEBUG" if you need more detailed information.
 logging.basicConfig(filename='log.log', filemode="w", level=logging.INFO, \
                     format='%(asctime)s %(message)s',datefmt="%Y-%m-%d %H:%M:%S")
 logging.getLogger().addHandler(logging.StreamHandler())
 
+# Print out initial information
 logging.info('Start script')
-
 logging.info('First KSA = '+str(cn['KSA']))
 logging.info('First KSE = '+str(cn['KSE']))
 
+# Set this flag to True for the first iteration of the model
 cn['firstrun'] = True
 
+# Enter the main loop. Number of iterations is equal to number of months between sdate and edate
 for i in range(cn['nmonths']):
 
     logging.info("\nMonth of the simulation: "+cn['date_present'].strftime('%Y-%m')+'\n')
-    mon_plus  = cn['date_present'] + datetime.timedelta(cn['tdiff']/24)
-    
-    cn['date_next']    = mon_plus
+
+    # Calculate the next starting date (needed for forcing files untaring and so on...)
+    cn['date_next']  = cn['date_present'] + datetime.timedelta(cn['tdiff']/24)
 
     forcing_present(cn) # checks if 'a' files are in place
     restart_present(cn) # checks if 'f' and 'g' files are in place
-    preprocessing(cn)   # create directories and untar 'a' files
-    cphclake(cn)        # GLACINDIA specific
-    generate_INPUT(cn)  # generate REMO INPUT file
+
+    # Generate and execute shell script that create 'xfolders' is nessesary,
+    # remove model results from previous run if needed and unpack forcing files (a-files)
+    # in to 'xa' directory.
+    preprocessing(cn)   
+
+    # Dynamicel glacier model specific (copy lake file)
+    cphclake(cn)
+
+    # Generates REMO INPUT file for current month
+    generate_INPUT(cn) 
     
+    # Pause in case the IO is slow
     time.sleep(1)
 
+    # Generates slurm batch script (e.g. slurm_remo_sub.sh)
     generate_batch_slurm(cn) # generate batch script
     
+    # Pause in case the IO is slow
     time.sleep(1)
 
  #   jobid = '12345' # only if we testing

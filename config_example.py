@@ -87,8 +87,8 @@ cn['xfolders']       = ['xa', 'xe', 'xf', 'xm', 'xn', 'xt', 'xpt', 'xm_tmp']
 
 # Names of the templates
 
-# This template generate shell script that create 'xfolders' is nessesary,
-# remove model results from previous run if needed and unpack forcing files (a-files)
+# This template is used to generate the shell script that creates 'xfolders' is nessesary,
+# removes model results from previous run if needed and unpacks forcing files (a-files)
 # in to 'xa' directory.
 cn['preprocessing_template']  = 'preprocessing_template'
 
