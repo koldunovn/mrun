@@ -52,7 +52,7 @@ for i in range(cn['nmonths']):
     # in to 'xa' directory.
     preprocessing(cn)   
 
-    # Dynamicel glacier model specific (copy lake file)
+    # Dynamical glacier model specific (copy lake file)
     cphclake(cn)
 
     # Generates REMO INPUT file for current month
@@ -75,12 +75,12 @@ for i in range(cn['nmonths']):
     logging.info('Job ID:'+jobid)
 
     complete = False
-
+    # counter of failed attempts to get the job info
     failedjob = 0
-
+    # monitoring loop, has to run while the job is running
     while complete==False:
+        # request information about the job status every ?? seconds
         time.sleep(10)
-        #print(complete)
         try:
             jobstate = get_job_state(int(jobid))
             failedjob = 0 #reset counter of failed attempts to get the job info              
@@ -91,7 +91,7 @@ for i in range(cn['nmonths']):
             else:
                 logging.info("No information about the job, give up")
                 raise NameError('No information about the job, give up')
-        
+        # draw progress bar
         progressbar(cn, jobstate)
         
         complete = is_job_done(int(jobid))
@@ -100,21 +100,37 @@ for i in range(cn['nmonths']):
  ################################################################
 
 
-#    generate_rm_last_mon(cn) #script to remove latest results
     final_status(cn, jobid)  #check final status of the job
 
     generate_INPUT_press_interp(cn) # generate INPUT file for pressure interpolation
     
     #Postprocessing call
+    # Generate and run postrpocessing shell script. 
+    # This script usually will:
+    # - copy STDOUT and STDERR output files to log directory
+    # - run pressure interpolation (druintzr)
+    # - run monthly averaging for pressure interpolated fields (mitzrpe)
+    # - pack results for one month to tarballs
+    # - upload tarballs to archive
+    # - remove tarballs from srcatch
     postprocessing(cn, jobid, execute=cn['post_execution'], rmyear=True, endmon = cn['endmon'])
 
-    #Prepare for the next month, update configuration
+    
     #os.system('mkdir {}'.format(cn['MONDIR']))
+
+    # convert monthly file to net cdf
     m2netcdf(cn)
+
+    # Parce STDOUT file and save it to .json format for monitoring
     save_log_values(cn)
+
+    # Copy configuration file with experiment number to monitoring folder
     os.system('cp config.py {}/monitor/config_{}.py'.format(cn['HOME'],cn['EXP']))
+    
+    # convert to netCDF last a and t file for the month
     at2netcdf(cn)
 
+    #Prepare for the next month, update configuration
     logging.debug("Next month will be: "+mon_plus.strftime('%Y-%m'))
     cn['tdiff'] = calendar.monthrange(mon_plus.year,mon_plus.month)[1]*24
     logging.debug('Number of days in the next month: '+str(cn['tdiff']))
@@ -124,9 +140,13 @@ for i in range(cn['nmonths']):
     logging.debug('New KSE: '+str(cn['KSE']))
 
     cn['date_present'] = cn['date_next']
+
     firstrun=False
 
+# after the end of the run copy log files to log directory
 os.system('cp log.log ./log/log_{}'.format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')))
+
+# If the postprocessing script will be executed in the background, whait for 10 minutes so the script can end.
 if cn['post_execution'] == 'back':
     logging.info('wait for 10 minutes while background processing is over')
     time.sleep(600)
